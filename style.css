@@ -65,3 +65,26 @@ body {
 .jump {
   transform: translateX(-50%) translateY(-40px);
 }
+.fairy {
+  position: absolute;   /* 部屋の中に重ねる配置 */
+  bottom: 60px;         /* 床からの距離 */
+  left: 50%;            /* 横位置を中央寄せ */
+  transform: translateX(-50%); /* 中央に揃える */
+  width: 120px;         /* 横幅を調整（好みに合わせて小さめに） */
+  height: auto;         /* 縦横比を維持 */
+  z-index: 10;          /* 背景より前に表示 */
+}
+
+.hidden {
+  display: none;
+}
+
+.jump {
+  animation: jump 0.5s ease;
+}
+
+@keyframes jump {
+  0%   { transform: translate(-50%, 0); }
+  50%  { transform: translate(-50%, -40px); }
+  100% { transform: translate(-50%, 0); }
+}
