@@ -2,44 +2,71 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>妖精さん育成</title>
   <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.webmanifest">
 </head>
 <body>
-  <div class="room">
-    <!-- 背景 -->
-    <img class="room-base" src="assets/room-base.png" alt="部屋の背景">
-    <img class="room-sky" data-sky="day" src="assets/sky-day.png" alt="昼の空">
-    <img class="room-sky hidden" data-sky="night" src="assets/sky-night.png" alt="夜の空">
-    <img class="room-window" src="assets/window-frame.png" alt="窓の枠">
+  <main class="app">
+    <!-- 部屋 -->
+    <div class="room" aria-label="妖精さんの部屋">
+      <!-- レイヤー：背景 -->
+      <img class="room-base layer" src="assets/room-base.png" alt="">
+      <img class="room-sky layer" data-sky="day" src="assets/sky-day.png" alt="昼の空">
+      <img class="room-sky layer hidden" data-sky="night" src="assets/sky-night.png" alt="夜の空">
+      <img class="room-window layer" src="assets/window-frame.png" alt="窓枠">
 
-    <!-- 妖精さん -->
-    <img id="fairy-stand" class="fairy" src="assets/fairy-stand.png" alt="妖精さん（直立）">
-    <img id="fairy-happy" class="fairy hidden" src="assets/fairy-happy.png" alt="妖精さん（バンザイ）">
-  </div>
+      <!-- 額縁の中身（ショップで差し替え） -->
+      <img id="frameArt" class="frame-art hidden" src="assets/frame-default.png" alt="額の中身">
 
-  <!-- パラメータ -->
-  <div class="params">
-    <div id="param-mood">ｺﾞｷｹﾞﾝ: ♥️♥️♥️♥️♥️</div>
-    <div id="param-hunger">ｵﾅｶ: 🍬🍬🍬🍬🍬</div>
-    <div id="param-sleep">ﾈﾑﾈﾑ: 💤💤💤💤💤</div>
-  </div>
+      <!-- 妖精さん（自分） -->
+      <img id="fairy-stand" class="fairy layer" src="assets/fairy-stand.png" alt="妖精さん">
+      <img id="fairy-happy" class="fairy layer hidden" src="assets/fairy-happy.png" alt="妖精さん（バンザイ）">
 
-  <!-- コマンド -->
-  <div class="commands">
-    <button id="act-pet">ﾅﾃﾞﾅﾃﾞ</button>
-    <button id="act-snack">ｵﾔﾂ</button>
-    <button id="act-sleep">ﾈﾝﾈ</button>
-    <button id="act-adventure">ﾎﾞｳｹﾝ</button>
-  </div>
+      <!-- お客さん（ゲスト妖精） -->
+      <img id="fairy-guest" class="fairy guest hidden" src="assets/fairy-guest1-stand.png" alt="お客さん">
 
-  <!-- ドングリ & 日記 -->
-  <div class="status">
-    🌰<span id="nuts">0</span>
-    <button id="save">日記(ｾｰﾌﾞ)</button>
-    <button id="toggle-sky">昼/夜</button>
+      <!-- 吹き出し＆エフェクト -->
+      <div id="bubble" class="bubble hidden"><p id="bubble-text">……</p></div>
+      <div class="fx-layer" id="fx"></div>
+    </div>
+
+    <!-- パネル：パラメータ -->
+    <section class="panel params">
+      <div id="param-mood">ｺﾞｷｹﾞﾝ: ♥️♥️♥️♥️♥️</div>
+      <div id="param-hunger">ｵﾅｶ: 🍬🍬🍬🍬🍬</div>
+      <div id="param-sleep">ﾈﾑﾈﾑ: 💤💤💤💤💤</div>
+    </section>
+
+    <!-- パネル：コマンド -->
+    <section class="panel commands">
+      <button id="act-pet"   class="pill">ﾅﾃﾞﾅﾃﾞ</button>
+      <button id="act-snack" class="pill">ｵﾔﾂ</button>
+      <button id="act-sleep" class="pill">ﾈﾝﾈ</button>
+      <button id="act-guest" class="pill">ｵｷｬｸｻﾝ</button>
+      <button id="act-adventure" class="pill">ﾎﾞｳｹﾝ</button>
+      <button id="toggle-sky" class="pill">昼/夜</button>
+      <button id="act-shop" class="pill">ｼｮｯﾌﾟ</button>
+    </section>
+
+    <!-- パネル：ステータス -->
+    <section class="panel status">
+      🌰<strong id="nuts">0</strong>
+      <button id="save" class="pill">日記(ｾｰﾌﾞ)</button>
+    </section>
+  </main>
+
+  <!-- ショップ（モーダル） -->
+  <div id="shop" class="modal hidden">
+    <div class="modal-body">
+      <div class="modal-head">
+        <strong>ｼｮｯﾌﾟ</strong>
+        <button id="shopClose" class="mini">とじる</button>
+      </div>
+      <div id="shopGrid" class="shop-grid"></div>
+      <p class="note">🌰 を使って額縁やパネル壁紙を買えるよ</p>
+    </div>
   </div>
 
   <script src="script.js"></script>
