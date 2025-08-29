@@ -194,8 +194,6 @@ function openShop(){ renderShop(); shop.classList.remove("hidden"); }
 function closeShop(){ shop.classList.add("hidden"); }
 document.getElementById("act-shop").onclick = openShop;
 document.getElementById("shopClose").onclick = closeShop;
-document.getElementById("act-shop").onclick = openShop;
-document.getElementById("shopClose").onclick = closeShop;
 
 // 黒背景クリック or ESCキーでも閉じられる
 shop.addEventListener("click", (e)=>{
