@@ -1,76 +1,61 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>妖精さん育成</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css?v=1">
 </head>
 <body>
-  <main class="app">
-    <!-- 部屋 -->
-    <div class="room" aria-label="妖精さんの部屋">
-      <!-- レイヤー：背景 -->
-      <img class="room-base layer" src="assets/room-base.png" alt="">
-      <img class="room-sky layer" data-sky="day" src="assets/sky-day.png" alt="昼の空">
-      <img class="room-sky layer hidden" data-sky="night" src="assets/sky-night.png" alt="夜の空">
-      <img class="room-window layer" src="assets/window-frame.png" alt="窓枠">
 
-      <!-- 額縁の中身（ショップで差し替え） -->
-      <img id="frameArt" class="frame-art hidden" src="assets/frame-default.png" alt="額の中身">
+  <!-- お部屋 -->
+  <div class="room" id="room">
+    <img id="roomBase" class="room-base" src="assets/room-base.png" alt="">
+    <img id="sky" class="room-sky" src="assets/sky-day.png" alt="" data-day="assets/sky-day.png" data-night="assets/sky-night.png">
+    <img id="frameArt" class="frame-art" src="assets/window-frame.png" alt="">
+    <!-- 妖精さん -->
+    <img id="fairy" class="fairy" src="assets/fairy-stand.png" alt="ようせい">
+  </div>
 
-      <!-- 妖精さん（自分） -->
-      <img id="fairy-stand" class="fairy layer" src="assets/fairy-stand.png" alt="妖精さん">
-      <img id="fairy-happy" class="fairy layer hidden" src="assets/fairy-happy.png" alt="妖精さん（バンザイ）">
+  <!-- パラメータ -->
+  <section class="panel status">
+    <div>ゴキゲン: <span id="mood">♥️♥️♥️♥️♥️</span></div>
+    <div>オナカ: <span id="hunger">🍬🍬🍬🍬🍬</span></div>
+    <div>ネムネム: <span id="sleep">💤💤💤💤💤</span></div>
+  </section>
 
-      <!-- お客さん（ゲスト妖精） -->
-      <img id="fairy-guest" class="fairy guest hidden" src="assets/fairy-guest1-stand.png" alt="お客さん">
+  <!-- コマンド -->
+  <section class="panel commands">
+    <button id="act-pet"  class="pill">ナデ ナデ</button>
+    <button id="act-snack" class="pill">オヤツ</button>
+    <button id="act-sleep" class="pill">ネネ</button>
+    <button id="toggle-sky" class="pill">昼/夜</button>
+    <button id="act-shop" class="pill">ショップ</button>
+  </section>
 
-      <!-- 吹き出し＆エフェクト -->
-      <div id="bubble" class="bubble hidden"><p id="bubble-text">……</p></div>
-      <div class="fx-layer" id="fx"></div>
-    </div>
-
-    <!-- パネル：パラメータ -->
-    <section class="panel params">
-      <div id="param-mood">ｺﾞｷｹﾞﾝ: ♥️♥️♥️♥️♥️</div>
-      <div id="param-hunger">ｵﾅｶ: 🍬🍬🍬🍬🍬</div>
-      <div id="param-sleep">ﾈﾑﾈﾑ: 💤💤💤💤💤</div>
-    </section>
-
-    <!-- パネル：コマンド -->
-    <section class="panel commands">
-      <button id="act-pet"   class="pill">ﾅﾃﾞﾅﾃﾞ</button>
-      <button id="act-snack" class="pill">ｵﾔﾂ</button>
-      <button id="act-sleep" class="pill">ﾈﾝﾈ</button>
-      <button id="act-guest" class="pill">ｵｷｬｸｻﾝ</button>
-      <button id="act-adventure" class="pill">ﾎﾞｳｹﾝ</button>
-      <button id="toggle-sky" class="pill">昼/夜</button>
-      <button id="act-shop" class="pill">ｼｮｯﾌﾟ</button>
-    </section>
-
-    <!-- パネル：ステータス -->
-    <section class="panel status">
-      🌰<strong id="nuts">0</strong>
-      <button id="save" class="pill">日記(ｾｰﾌﾞ)</button>
-    </section>
-  </main>
+  <!-- ステータス下段 -->
+  <section class="panel foot">
+    <span class="nuts">🌰<strong id="nuts">0</strong></span>
+    <button id="save" class="pill">日記(セーブ)</button>
+  </section>
 
   <!-- ショップ（モーダル） -->
-  <div id="shop" class="modal hidden">
+  <div id="shop" class="modal hidden" aria-hidden="true">
     <div class="modal-body">
       <div class="modal-head">
-        <strong>ｼｮｯﾌﾟ</strong>
-        <button id="shopClose" class="mini" type="button" onclick="closeShop()">
-  とじる
-</button>
+        <strong>ショップ</strong>
+        <!-- “絶対閉じる” ルート -->
+        <button id="shopClose" class="mini" type="button" onclick="closeShop()">とじる</button>
       </div>
-      <div id="shopGrid" class="shop-grid"></div>
-      <p class="note">🌰 を使って額縁やパネル壁紙を買えるよ</p>
+      <div id="shopGrid" class="shop-grid">
+        <!-- 最小の品揃え（動作確認用） -->
+        <button data-id="frameA">額縁１（2🌰）</button>
+        <button data-id="panelDark">パネル壁紙（2🌰）</button>
+      </div>
+      <p class="note">🌰を使って額縁やパネル壁紙を買えるよ</p>
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=1"></script>
 </body>
 </html>
