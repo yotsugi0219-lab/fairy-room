@@ -194,7 +194,16 @@ function openShop(){ renderShop(); shop.classList.remove("hidden"); }
 function closeShop(){ shop.classList.add("hidden"); }
 document.getElementById("act-shop").onclick = openShop;
 document.getElementById("shopClose").onclick = closeShop;
+document.getElementById("act-shop").onclick = openShop;
+document.getElementById("shopClose").onclick = closeShop;
 
+// 黒背景クリック or ESCキーでも閉じられる
+shop.addEventListener("click", (e)=>{
+  if(e.target.id === "shop") closeShop();
+});
+document.addEventListener("keydown",(e)=>{
+  if(e.key==="Escape") closeShop();
+});
 // ====== ボタン動作（かわいめ演出つき） ======
 document.getElementById("act-pet").onclick = ()=>{
   if(mood<max) mood++;
