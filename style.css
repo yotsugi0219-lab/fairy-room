@@ -20,7 +20,7 @@ body{ margin:0; background:var(--bg); color:var(--fg); font-family:-apple-system
 
 /* 妖精さん（自分） */
 .fairy{
-  position:absolute; left:50%; bottom:7%;
+  position:absolute; left:50%; bottom:5%;
   transform:translateX(-50%); width:min(20%,128px); height:auto; pointer-events:auto;
 }
 /* お客さん（左寄りに出す） */
