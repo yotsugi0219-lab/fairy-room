@@ -9,13 +9,15 @@
 </head>
 <body>
   <div class="room">
-    <img class="room-base" src="assets/themes/default/room-base.png" alt="">
-    <img class="room-sky" data-sky src="assets/themes/default/sky-day.png" alt="">
-    <img class="room-window" src="assets/themes/default/window-frame.png" alt="">
+    <!-- 背景 -->
+    <img class="room-base" src="assets/room-base.png" alt="部屋の背景">
+    <img class="room-sky" data-sky="day" src="assets/sky-day.png" alt="昼の空">
+    <img class="room-sky hidden" data-sky="night" src="assets/sky-night.png" alt="夜の空">
+    <img class="room-window" src="assets/window-frame.png" alt="窓の枠">
 
     <!-- 妖精さん -->
-    <img id="fairy-stand" class="fairy" src="assets/fairy-stand.png" alt="妖精さん">
-    <img id="fairy-happy" class="fairy hidden" src="assets/fairy-happy.png" alt="妖精さんバンザイ">
+    <img id="fairy-stand" class="fairy" src="assets/fairy-stand.png" alt="妖精さん（直立）">
+    <img id="fairy-happy" class="fairy hidden" src="assets/fairy-happy.png" alt="妖精さん（バンザイ）">
   </div>
 
   <!-- パラメータ -->
@@ -33,9 +35,9 @@
     <button id="act-adventure">ﾎﾞｳｹﾝ</button>
   </div>
 
-  <!-- ドングリ＆日記 -->
+  <!-- ドングリ & 日記 -->
   <div class="status">
-    <span id="nuts">🌰0</span>
+    🌰<span id="nuts">0</span>
     <button id="save">日記(ｾｰﾌﾞ)</button>
     <button id="toggle-sky">昼/夜</button>
   </div>
