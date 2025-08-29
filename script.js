@@ -52,3 +52,5 @@ function load(){
   updateParams();
 }
 load();
+// 妖精さんクリックでジャンプ
+document.getElementById("fairy-stand").addEventListener("click", fairyJump);
