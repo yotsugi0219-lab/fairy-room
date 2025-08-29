@@ -1,76 +1,64 @@
-/* ページ全体 */
-body {
-  margin: 0;
-  background: #000;
-  font-family: sans-serif;
-  text-align: center;
-  color: #fff;
+/* ベース */
+:root{
+  --bg:#0f0f0f; --card:#17181c; --fg:#f5f7fb; --muted:#93a2b8; --accent:#8aa6ff;
+}
+*{ box-sizing:border-box; }
+body{ margin:0; background:var(--bg); color:var(--fg); font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Segoe UI", Roboto, "Noto Sans JP", sans-serif; }
+.app{ max-width:720px; margin:0 auto; padding:8px 12px 24px; }
+
+/* 部屋（縦横比固定で高さを作る） */
+.room{
+  position:relative;
+  width:100%;
+  aspect-ratio:16/9;          /* ← これで高さがゼロにならない */
+  margin:8px auto 16px;
+  background:#000;            /* 調整用の下地。気になれば消してOK */
+  border-radius:12px; overflow:hidden;
+}
+.layer{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit:cover;           /* 画像をいい感じにフィット */
+}
+/* レイヤー順序 */
+.room-base{ z-index:1; }
+.room-sky { z-index:2; }
+.room-window{ z-index:3; }
+.fairy{ z-index:4; }
+
+.hidden{ display:none; }
+
+/* 妖精さんの位置とサイズ */
+.fairy{
+  position:absolute;
+  left:50%;
+  bottom:10%;                 /* 床からの距離。好みで調整OK */
+  transform:translateX(-50%);
+  width:min(22%, 140px);      /* 端末に合わせて小さめに */
+  height:auto;
+  pointer-events:auto;
 }
 
-/* 部屋全体 */
-.room {
-  position: relative;   /* 子要素の絶対配置の基準にする */
-  width: 100%;
-  max-width: 600px;     /* 部屋の横幅を制限（スマホで見やすく） */
-  margin: 0 auto;       /* ページ中央に配置 */
-  overflow: hidden;
+/* ぴょんアニメ */
+.jump{ animation:jump 0.55s ease; }
+@keyframes jump{
+  0%{   transform:translate(-50%,0); }
+  45%{  transform:translate(-50%,-40px); }
+  100%{ transform:translate(-50%,0); }
 }
 
-/* 背景画像たち */
-.room img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
+/* パネル類 */
+.panel{ margin:10px 0; text-align:center; }
+.params div{ margin:4px 0; font-size:18px; }
 
-.room-base,
-.room-sky,
-.room-window {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: auto;
+/* 丸ボタン */
+.pill{
+  background:var(--card); color:var(--fg);
+  border:none; border-radius:24px; padding:12px 18px;
+  margin:6px; font-size:16px; min-width:96px;
+  box-shadow:0 0 0 1px #2a2d36 inset;
 }
+.pill:active{ transform:translateY(1px); }
 
-.hidden {
-  display: none;
-}
-
-/* 妖精さん */
-.fairy {
-  position: absolute;
-  bottom: 60px;            /* 床からの距離 */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;            /* サイズ調整 */
-  height: auto;
-  z-index: 10;
-  transition: transform 0.3s ease;
-}
-
-/* ジャンプアニメ */
-.jump {
-  animation: jump 0.5s ease;
-}
-
-@keyframes jump {
-  0%   { transform: translate(-50%, 0); }
-  50%  { transform: translate(-50%, -40px); }
-  100% { transform: translate(-50%, 0); }
-}
-
-/* パラメータ表示 */
-.params, .commands, .status {
-  margin: 10px;
-}
-
-.commands button, .status button {
-  border: none;
-  border-radius: 50%;
-  padding: 15px;
-  margin: 5px;
-  font-size: 14px;
-  background: #333;
-  color: #fff;
-}
+/* ステータス行 */
+.status{ display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap; }
