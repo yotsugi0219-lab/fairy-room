@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>妖精さん育成</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.webmanifest">
+</head>
+<body>
+  <div class="room">
+    <img class="room-base" src="assets/themes/default/room-base.png" alt="">
+    <img class="room-sky" data-sky src="assets/themes/default/sky-day.png" alt="">
+    <img class="room-window" src="assets/themes/default/window-frame.png" alt="">
+
+    <!-- 妖精さん -->
+    <img id="fairy-stand" class="fairy" src="assets/fairy-stand.png" alt="妖精さん">
+    <img id="fairy-happy" class="fairy hidden" src="assets/fairy-happy.png" alt="妖精さんバンザイ">
+  </div>
+
+  <!-- パラメータ -->
+  <div class="params">
+    <div id="param-mood">ｺﾞｷｹﾞﾝ: ♥️♥️♥️♥️♥️</div>
+    <div id="param-hunger">ｵﾅｶ: 🍬🍬🍬🍬🍬</div>
+    <div id="param-sleep">ﾈﾑﾈﾑ: 💤💤💤💤💤</div>
+  </div>
+
+  <!-- コマンド -->
+  <div class="commands">
+    <button id="act-pet">ﾅﾃﾞﾅﾃﾞ</button>
+    <button id="act-snack">ｵﾔﾂ</button>
+    <button id="act-sleep">ﾈﾝﾈ</button>
+    <button id="act-adventure">ﾎﾞｳｹﾝ</button>
+  </div>
+
+  <!-- ドングリ＆日記 -->
+  <div class="status">
+    <span id="nuts">🌰0</span>
+    <button id="save">日記(ｾｰﾌﾞ)</button>
+    <button id="toggle-sky">昼/夜</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
