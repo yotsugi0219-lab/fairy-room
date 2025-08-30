@@ -186,7 +186,7 @@ function dropSnack(onLanded) {
       updateView();
 
       // 帰還
-      fairy.style.opacity = '';
+      fairy.style.opacity = '1';
       jump();
       say(`｢ﾄﾞﾝｸﾞﾘ ${gain}ｺ ﾐﾂｹﾀ｣`, 1200);
       STATE.isAway = false;
