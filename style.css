@@ -45,14 +45,14 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
   z-index:4; position:absolute;
   left:50%; transform:translateX(-50%);
   bottom:8%;
-  width:clamp(96px, 20vw, 150px);
+  width:clamp(80px, 15vw, 128px);
   height:auto; object-fit:contain; border-radius:12px;
 }
 
 /* ﾈﾝﾈ時：ベッド中央にスナップ（必要に応じて微調整OK） */
 .fairy.sleeping{
-  left:72%; bottom:22%; transform:translateX(-50%);
-  width:clamp(110px, 22vw, 170px);
+  left:66%; bottom:27%; transform:translateX(-50%);
+  width:clamp(96px, 17vw, 144px);
 }
 
 /* セリフ */
