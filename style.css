@@ -61,8 +61,10 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
 }
 
 /* ﾈﾝﾈ時：ベッド中央にスナップ（必要に応じて微調整OK） */
-.fairy.sleeping{
-  left:66%; bottom:27%; transform:translateX(-50%);
+.fairy.sleeping {
+  left:50%;               /* 部屋の中央に */
+  bottom:20%;             /* ベッドの高さに合わせて微調整。低ければ 18%、高ければ 22% とか */
+  transform:translateX(-50%);
   width:clamp(96px, 17vw, 144px);
 }
 
