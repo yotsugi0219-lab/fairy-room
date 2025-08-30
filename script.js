@@ -112,6 +112,21 @@ document.getElementById('act-snack').onclick = ()=>{
   say(CFG.talk.snack);
 };
 
+// --- おやつボタン ---
+{
+  const btn = document.getElementById('act-snack');
+  if (btn) {
+    btn.onclick = () => {
+      console.log('[click] snack');     // 到達ログ
+      // 状態更新があればここで（例：hunger-- など）
+      dropSnack();                       // ← 必ず呼ぶ
+    };
+    btn.ontouchstart = (e) => { e.preventDefault(); btn.click(); };
+  } else {
+    console.warn('#act-snack が見つからないよ');
+  }
+}
+
 document.getElementById('act-sleep').onclick = ()=>{
   // ﾈﾝﾈ開始
   fairy.classList.add('sleeping');
