@@ -48,10 +48,21 @@ function say(pool, ms=1100){
 function updateView(){
   pvMood.textContent   = "♥️".repeat(mood);
   pvHunger.textContent = "🍬".repeat(hunger);
-  pvSleep.textContent  = "💪".repeat(sleep);   // 既にゲンキ表記にしてる想定
+  pvSleep.textContent  = "💪".repeat(sleep);
   nutsEl.textContent   = String(nuts);
+  applyBasePose(); // ここで呼ぶ
+}
 
-  applyBasePose();      // ← ここを追加
+// ごきげん低いときの差分
+function applyBasePose() {
+  if (fairy.classList.contains('sleeping')) return;
+  if (/fairy-happy/.test(fairy.src)) return;
+
+  const want = (mood <= 1)
+    ? 'assets/fairy-back.png'
+    : 'assets/fairy-stand.png';
+
+  if (!fairy.src.endsWith(want)) fairy.src = want;
 }
 /* ===== パラメータ自然変化（15秒に1回） ===== */
 const STATE = { isAway:false, guest:null };
