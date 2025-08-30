@@ -64,7 +64,7 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
 .fairy.sleeping {
   left:50%;
   bottom:20%;
-  transform:translateX(-60%); /* ← -50% から -60% にすると10%左寄せ */
+  transform:translateX(-70%); /* ← -50% から -60% にすると10%左寄せ */
   width:clamp(96px, 17vw, 144px);
 }
 
