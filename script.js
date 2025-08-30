@@ -68,14 +68,10 @@ function applyBasePose() {
 const STATE = { isAway:false, guest:null };
 
 function tick() {
-  const sleeping = fairy.classList.contains('sleeping');
-
-  if (!sleeping && !STATE.isAway) {
-    // ｵﾅｶだけ時間で減らす
-    hunger = clamp(hunger - 1, 0, CFG.max);
-    // ｹﾞﾝｷ(sleep)は時間経過で減らさない
-    if (hunger === 0) mood = clamp(mood - 1, 0, CFG.max);
-  }
+  const sleeping = fairy.classList.contains('if (!sleeping && !STATE.isAway) {
+  hunger = clamp(hunger - 1, 0, CFG.max);  // おなかだけ減る
+  if (hunger === 0) mood = clamp(mood - 1, 0, CFG.max);
+}
   updateView();
 
   // いまの数値から「基本ポーズ」を決めて反映する
