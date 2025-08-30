@@ -68,18 +68,28 @@ function jump(){
     fairy.src = old.includes('fairy-happy') ? "assets/fairy-stand.png" : old;
   });
 }
-function dropSnacks(count=CFG.snackCount){
-  const ems = ["🥮","🍒","🍬","🍓","🧁"];
-  for(let i=0;i<count;i++){
-    const s = document.createElement('span');
-    s.className = 'snack';
-    s.textContent = ems[Math.floor(Math.random()*ems.length)];
-    s.style.left = (10 + Math.random()*80) + '%';
-    s.style.setProperty('--t', (900 + Math.random()*900) + 'ms');
-    s.style.animationDelay = (Math.random()*250) + 'ms';
-    fx.appendChild(s);
-    s.addEventListener('animationend', ()=> s.remove(), {once:true});
-  }
+function dropSnack() {
+  const fx = document.getElementById('fx');
+
+  // おやつ候補
+  const snacks = ['🥮','🍒','🍰','🍮','🍩'];
+  const snack = snacks[Math.floor(Math.random() * snacks.length)];
+
+  // 要素を作成
+  const el = document.createElement('span');
+  el.className = 'snack';
+  el.textContent = snack;
+
+  // 速度は固定（例：1400ms）
+  el.style.setProperty('--t', '1400ms');
+
+  // 横位置は中央（妖精さん上あたりに降ろしたいなら50%）
+  el.style.setProperty('--x', '50%');
+
+  fx.appendChild(el);
+
+  // アニメ終了後に削除
+  el.addEventListener('animationend', () => el.remove());
 }
 
 // iOSドラッグ無効（念のため）
