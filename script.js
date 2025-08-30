@@ -172,11 +172,15 @@ function saveGame(){
 
 (function wire(){
   const on = (id, fn) => {
-    const b = document.getElementById(id);
-    if (!b) { console.warn('missing:', id); return; }
-    b.addEventListener('click', fn);
-    b.addEventListener('touchstart', e=>{ e.preventDefault(); fn(e); }, {passive:false});
-  };
+  const b = document.getElementById(id);
+  if (!b) return;
+
+  const handler = (e) => { e.preventDefault?.(); fn(e); };
+  // pointerup で一本化（タッチでもクリックでも1回だけ）
+  b.addEventListener('pointerup', handler);
+  // 古い環境用に click も残す
+  b.addEventListener('click', handler);
+};
 
   // ﾅﾃﾞﾅﾃﾞ
   on('act-pet', () => {
