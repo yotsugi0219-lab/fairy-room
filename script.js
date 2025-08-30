@@ -68,30 +68,31 @@ function jump(){
     fairy.src = old.includes('fairy-happy') ? "assets/fairy-stand.png" : old;
   });
 }
-function dropSnack() {
+function dropSnack(onLanded) {
   const fx = document.getElementById('fx');
 
   // おやつ候補
   const snacks = ['🥮','🍒','🍰','🍮','🍩'];
-  const snack = snacks[Math.floor(Math.random() * snacks.length)];
+  const snack  = snacks[Math.floor(Math.random() * snacks.length)];
 
   // 要素を作成
   const el = document.createElement('span');
   el.className = 'snack';
   el.textContent = snack;
 
-  // 速度は固定（例：1400ms）
+  // 速度・位置（固定）
   el.style.setProperty('--t', '1400ms');
-
-  // 横位置は中央（妖精さん上あたりに降ろしたいなら50%）
   el.style.setProperty('--x', '50%');
 
   fx.appendChild(el);
 
-el.addEventListener('animationend', () => {
+  // ✅ ここをきちんと閉じる（});）
+  el.addEventListener('animationend', () => {
     el.remove();
-    if (typeof onLanded === 'function') onLanded();  // ← 着地後に実行
-  
+    if (typeof onLanded === 'function') onLanded();
+  });
+}
+
 // iOSドラッグ無効（念のため）
 ["roomBase","sky","windowFrame","fairy"].forEach(id=>{
   const el = document.getElementById(id);
@@ -102,14 +103,6 @@ el.addEventListener('animationend', () => {
 document.getElementById('act-pet').onclick = ()=>{
   mood = clamp(mood+1, 0, CFG.max); updateView();
   jump(); say(CFG.talk.pet);
-};
-
-document.getElementById('act-snack').onclick = ()=>{
-  hunger = clamp(hunger+1, 0, CFG.max); updateView();
-  dropSnacks();
-  swapFairy("assets/fairy-eat1.png", 420);
-  setTimeout(jump, 420);
-  say(CFG.talk.snack);
 };
 
 // --- おやつボタン ---
