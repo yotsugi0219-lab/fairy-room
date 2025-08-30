@@ -105,7 +105,6 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
   filter: drop-shadow(0 2px 2px rgba(0,0,0,.25));
   animation:
     fall var(--t, 1400ms) linear forwards,          /* 縦：--ty を動かす */
-    wiggle 700ms ease-in-out infinite alternate;    /* 横：--tx を動かす */
 }
 
 /* ✅ 落下は「上空（-20%）→ 床下（+130%）」までしっかり移動 */
@@ -114,10 +113,6 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
   to   { --ty:130%; opacity:.95; }
 }
 
-/* ✅ ふらふらは横方向だけ（--tx を使うので transform を上書きしない） */
-@keyframes wiggle{
-  from { --tx:-6px; }
-  to   { --tx: 6px; }
 }
 /* ========== 下パネル（非モーダル） ========== */
 .panel{
