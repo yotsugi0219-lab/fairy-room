@@ -5,40 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>妖精さん育成</title>
   <link rel="stylesheet" href="style.css?v=16" />
-<script src="script.js?v=17" defer></script>
+  <!-- ✅ スクリプトは1つだけ。バージョンは最新に合わせる -->
+  <script src="script.js?v=17" defer></script>
 </head>
 <body>
   <main class="wrap">
-
-    <!-- 上余白（セリフ表示は部屋内バルーンで） -->
-
-    <!-- 部屋（16:9固定。画像は1枚ずつ・増やさない） -->
     <section class="room" id="room">
       <img id="roomBase" class="room-base" src="assets/room-base.png" alt="">
-      <!-- 窓の空：昼夜は data-* だけを切り替える（重複生成しない） -->
       <img id="sky" class="room-sky"
            src="assets/sky-day.png"
            data-day="assets/sky-day.png"
            data-night="assets/sky-night.png"
            data-state="day" alt="">
-      <!-- 窓枠（位置はCSSで合わせる） -->
       <img id="windowFrame" class="window-frame" src="assets/window-frame.png" alt="">
-      <!-- 妖精（1枚を差し替え運用。サイズはclampで暴れない） -->
       <img id="fairy" class="fairy" src="assets/fairy-stand.png" alt="ようせい">
-      <!-- バルーン -->
       <div id="speech" class="speech hidden"><span id="speechText"></span></div>
-      <!-- おやつ落下レイヤ -->
       <div id="fx" class="fx"></div>
     </section>
 
-    <!-- パラメータ（♥️/🍬/💤 5段階） -->
     <section class="panel status">
       <div>ｺﾞｷｹﾞﾝ: <span id="pv-mood">♥️♥️♥️♥️♥️</span></div>
       <div>ｵﾅｶ: <span id="pv-hunger">🍬🍬🍬🍬🍬</span></div>
       <div>ﾈﾑﾈﾑ: <span id="pv-sleep">💤💤💤💤💤</span></div>
     </section>
 
-    <!-- コマンド帯（通常表示） -->
     <section id="cmdPanel" class="panel commands">
       <div class="row">
         <button id="act-pet" class="pill">ﾅﾃﾞﾅﾃﾞ</button>
@@ -55,20 +45,14 @@
       </div>
     </section>
 
-    <!-- ショップ帯（インライン展開。モーダルは使わない） -->
     <section id="shopPanel" class="panel shop hidden" aria-hidden="true">
       <header class="shop-hd">
         <strong>ｼｮｯﾌﾟ</strong>
         <button id="shop-close" class="pill mini">とじる</button>
       </header>
-      <div id="shopGrid" class="shop-grid">
-        <!-- JSで列挙 -->
-      </div>
+      <div id="shopGrid" class="shop-grid"></div>
       <p class="note">🌰をつかって下の帯の壁紙をかえられるよ</p>
     </section>
-
   </main>
-
-  <script src="script.js?v=10" defer></script>
 </body>
 </html>
