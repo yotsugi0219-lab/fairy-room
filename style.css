@@ -1,238 +1,110 @@
-/* ---- ベース ---- */
-* { box-sizing: border-box; }
-html, body { height: 100%; }
-html { -webkit-text-size-adjust: 100%; }
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
-  background: #0b0b10;
-  color: #111;
-  -webkit-user-select: none;
-  user-select: none;
-  touch-action: manipulation;
-}
-img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
-
-/* ---- 16:9 セーフフレーム ---- */
-.frame {
-  min-height: 100%;
-  display: grid;
-  place-items: center;
-  padding-bottom: env(safe-area-inset-bottom, 0);
-}
-.game {
-  width: min(100vw, 100vh * 16 / 9);
-  height: calc(100vw * 9 / 16);
-  max-height: min(100vh, 100vw * 9 / 16);
-  aspect-ratio: 16/9;
-  background: #dcdde1;
-  border-radius: 12px;
-  overflow: hidden;
-  position: relative;
-  box-shadow: 0 10px 40px rgba(0,0,0,.35);
+:root{
+  --bg:#0f1013;
+  --ink:#f5f7fb;
+  --muted:#9ba7b6;
+  --card:#17181c;
+  --line:#2a2d36;
+  --pill:#21242c;
+  /* 下パネルの壁紙色（ショップで変更） */
+  --panel-wall:#17181c;
 }
 
-/* ---- ステージ（レイヤー積層） ---- */
-.stage {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  background: #eaeef2;
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+  user-select:none;
 }
-.wallpaper {
-  position: absolute; inset: 0;
-  background: var(--wallpaper, linear-gradient(180deg, #f5f6fb 0%, #eceff6 100%));
+img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:block; }
+
+.wrap{ max-width:780px; margin:12px auto 48px; padding:0 12px; }
+
+/* ========== 部屋（16:9固定） ========== */
+.room{
+  position:relative; width:100%; aspect-ratio:16/9;
+  margin:10px auto; border-radius:16px; overflow:hidden;
+  background:#1b1e25; box-shadow:0 12px 24px rgba(0,0,0,.25);
 }
-.layer { position: absolute; }
-.sky {
-  /* 窓の中に来る大きさ・位置（比率ベースで固定） */
-  top: 3.5%; right: 5%;
-  width: 36%;
-  height: auto;
+.room img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.room-base{ z-index:1; }
+
+/* 窓の空（位置は絵に合わせて％指定。必要なら微調整） */
+.room-sky{
+  z-index:2; pointer-events:none;
+  width:38%; height:38%; left:9%; top:9%;
+  object-fit:cover; clip-path:inset(0 round 6px);
 }
-.room {
-  bottom: 0; left: 0;
-  width: 100%;
-  height: auto;
-}
-.window {
-  /* skyの手前・roomの上 */
-  top: 2%; right: 3%;
-  width: 40%;
-  height: auto;
-  z-index: 3;
-}
-.fairy {
-  position: absolute;
-  bottom: 9%;
-  left: 50%;
-  width: 14%;
-  height: auto;
-  transform: translateX(-50%);
-  z-index: 4;
-}
-.sleepZ {
-  position: absolute;
-  font-size: clamp(20px, 3.0vw, 32px);
-  top: 12%;
-  left: 57%;
-  opacity: 0;
-  transform: translateY(0);
-  transition: opacity .25s ease, transform .25s ease;
-  z-index: 5;
-}
-.sleepZ.show {
-  opacity: 1;
-  transform: translateY(-8%);
+.window-frame{
+  z-index:3; pointer-events:none;
+  width:38%; height:38%; left:9%; top:9%; object-fit:cover;
 }
 
-/* ---- HUD ---- */
-.hud {
-  position: absolute;
-  top: 8px;
-  left: 10px;
-  right: 10px;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  z-index: 6;
-  pointer-events: none;
-}
-.status {
-  background: rgba(255,255,255,.75);
-  backdrop-filter: blur(8px);
-  border-radius: 999px;
-  padding: 6px 10px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  pointer-events: auto;
-}
-.status .label { font-size: 16px; }
-.status .value {
-  min-width: 6ch;
-  font-size: 16px;
-  letter-spacing: 1px;
-}
-.acorns {
-  margin-left: auto;
-  background: rgba(255,255,255,.85);
-  backdrop-filter: blur(8px);
-  border-radius: 999px;
-  padding: 6px 12px;
-  font-weight: 700;
-  pointer-events: auto;
+/* 妖精（中央基準・暴れないclamp） */
+.fairy{
+  z-index:4; position:absolute;
+  left:50%; transform:translateX(-50%);
+  bottom:8%;
+  width:clamp(96px, 20vw, 150px);
+  height:auto; object-fit:contain; border-radius:12px;
 }
 
-/* ---- コントローラ（Pillボタン） ---- */
-.controls {
-  position: absolute;
-  left: 12px; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom, 0));
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-  z-index: 7;
-}
-.pill {
-  -webkit-tap-highlight-color: transparent;
-  appearance: none;
-  border: 0;
-  height: 54px; /* iOSタップしやすさ */
-  border-radius: 999px;
-  font-size: clamp(13px, 2.8vw, 16px);
-  font-weight: 700;
-  letter-spacing: .04em;
-  background: #111;
-  color: #fff;
-  box-shadow: 0 3px 0 #000, 0 8px 18px rgba(0,0,0,.25);
-  transform: translateY(0);
-  transition: transform .06s ease, box-shadow .12s ease, opacity .12s ease;
-}
-.pill:active { transform: translateY(2px); box-shadow: 0 1px 0 #000, 0 4px 10px rgba(0,0,0,.2); }
-.pill:disabled { opacity: .6; }
-
-/* ---- モーダル ---- */
-.modal.hidden { display: none; }
-.modal {
-  position: fixed; inset: 0; z-index: 100;
-}
-.modal .backdrop {
-  position: absolute; inset: 0;
-  background: rgba(0,0,0,.45);
-}
-.dialog {
-  position: absolute;
-  left: 50%; top: 50%;
-  transform: translate(-50%,-50%);
-  width: min(92vw, 640px);
-  background: #fff;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,.35);
-}
-.dialog-head, .dialog-foot {
-  padding: 12px 14px;
-  background: #0f172a;
-  color: #fff;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.dialog-foot { background: #f1f5f9; color: #0f172a; }
-.dialog-body { padding: 14px; background: #fff; color: #111; }
-.dialog h2 { font-size: 18px; margin: 0; }
-.close {
-  border: 0; background: transparent; color: #fff;
-  font-size: 22px; line-height: 1; cursor: pointer;
-}
-.pill.alt { background: #111; color: #fff; }
-.note { margin: 0 0 10px; }
-
-.wall-list {
-  list-style: none; margin: 0; padding: 0;
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
-}
-.wall {
-  border: 2px solid #e5e7eb;
-  border-radius: 12px; overflow: hidden;
-  background: #fafafa;
-  display: grid; grid-template-rows: 72px auto;
-}
-.wall .preview { width: 100%; height: 72px; }
-.wall .meta { padding: 8px; display: grid; gap: 6px; }
-.wall .meta .name { font-weight: 700; }
-.wall .meta .price { color: #475569; font-size: 13px; }
-.wall .buy {
-  margin-top: 6px;
-  width: 100%;
-  height: 40px;
-  border: 0; border-radius: 10px;
-  font-weight: 700;
-  background: #0ea5e9; color: #fff;
-}
-.wall .buy:disabled { background: #94a3b8; }
-
-/* ---- エフェクト / アニメ ---- */
-@keyframes jump {
-  0% { transform: translate(-50%, 0); }
-  30% { transform: translate(-50%, -10%); }
-  100% { transform: translate(-50%, 0); }
-}
-.fairy.jump { animation: jump .45s ease-out; }
-
-.fx { position: absolute; inset: 0; pointer-events: none; z-index: 8; }
-.drop {
-  position: absolute;
-  font-size: clamp(22px, 3.2vw, 30px);
-  transition: transform .8s cubic-bezier(.2,.8,.2,1), opacity .2s ease;
-  transform: translate(-50%, -110%);
-  opacity: 1;
-}
-.drop.land {
-  transform: translate(var(--tx), var(--ty));
-}
-.drop.fade {
-  opacity: 0;
-  transition: opacity .2s ease;
+/* ﾈﾝﾈ時：ベッド中央にスナップ（必要に応じて微調整OK） */
+.fairy.sleeping{
+  left:72%; bottom:22%; transform:translateX(-50%);
+  width:clamp(110px, 22vw, 170px);
 }
 
-/* 予防的：iOSの長押しメニュー回避 */
-a, button { -webkit-touch-callout: none; }
+/* セリフ */
+.speech{
+  position:absolute; left:50%; bottom:26%; transform:translateX(-50%);
+  z-index:6; background:rgba(0,0,0,.75);
+  padding:8px 12px; border-radius:12px; border:1px solid var(--line);
+  box-shadow:0 6px 16px rgba(0,0,0,.35); font-size:14px;
+}
+.speech.hidden{ display:none; }
+
+/* おやつ落下レイヤ（部屋内） */
+.fx{ position:absolute; inset:0; z-index:5; pointer-events:none; }
+.snack{
+  position:absolute; top:-10%; font-size:26px; filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));
+  animation: fall var(--t,1200ms) linear forwards, wiggle 700ms ease-in-out infinite alternate;
+}
+@keyframes fall{ to { transform: translateY(110%); opacity:.95; } }
+@keyframes wiggle{ from{transform:translateX(-6px)} to{transform:translateX(6px)} }
+
+/* ========== 下パネル（非モーダル） ========== */
+.panel{
+  background:var(--panel-wall);
+  border:1px solid var(--line);
+  border-radius:16px; padding:12px; margin-top:12px;
+  box-shadow:0 10px 24px rgba(0,0,0,.25);
+}
+.status div{ margin:4px 0; font-size:18px; }
+
+.commands .row{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:center; }
+.inline{ display:inline-flex; gap:10px; align-items:center; }
+
+.pill{
+  appearance:none; border:none; background:var(--pill); color:var(--ink);
+  border-radius:999px; padding:10px 18px; font-weight:700; min-width:92px;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.pill:active{ transform:translateY(1px); }
+.pill.mini{ min-width:auto; padding:8px 12px; font-weight:600; }
+.pill.accent{ box-shadow: inset 0 0 0 2px #5e76ff; }
+
+/* ショップ帯 */
+.shop.hidden{ display:none; }
+.shop-hd{ display:flex; align-items:center; justify-content:space-between; }
+.shop-grid{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:10px;
+}
+.shop-item{
+  background:#1b1f26; border:1px solid var(--line); border-radius:12px; padding:10px; text-align:center;
+}
+.shop-item .label{ margin-top:6px; }
+.shop-item button{ margin-top:8px; }
+
+/* 安定化 */
+.hidden{ display:none !important; }
