@@ -51,6 +51,26 @@ function updateView(){
   pvSleep.textContent  = "💤".repeat(sleep);
   nutsEl.textContent   = String(nuts);
 }
+/* ===== パラメータ自然変化（15秒に1回） ===== */
+const STATE = { isAway:false, guest:null };
+
+function tick() {
+  // 寝てる時は減らさない（寝姿判定は class で）
+  const sleeping = fairy.classList.contains('sleeping');
+  if (!sleeping) {
+    hunger = clamp(hunger - 1, 0, CFG.max);
+    sleep  = clamp(sleep  - 1, 0, CFG.max);
+    if (hunger === 0 || sleep === 0) mood = clamp(mood - 1, 0, CFG.max);
+  }
+  updateView();
+
+  // たまに独り言
+  if (Math.random() < 0.15 && !STATE.isAway && !STATE.guest) {
+    say(CFG.talk.idle, 1000);
+  }
+}
+// 15秒ごとに実行
+setInterval(tick, 30000);
 function swapFairy(src, dur=350){
   const old = fairy.src;
   fairy.src = src;
