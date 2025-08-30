@@ -92,28 +92,25 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
 }
 
 /* おやつ落下レイヤ（部屋内） */
-/* 部屋内のエフェクトレイヤはそのまま */
+/* エフェクトレイヤはそのまま */
 .fx{ position:absolute; inset:0; z-index:5; pointer-events:none; }
 
-/* 🍬おやつ：transform を CSS変数で“合成”する */
+/* 🍬 おやつ：真っ直ぐ落下（Safariでも確実に動く版） */
 .snack{
   position:absolute;
-  top:0;                                   /* ← 原点は部屋の上端 */
-  left: var(--x, 50%);                     /* 生成時に --x を％で入れると妖精の上に落とせる */
-  transform: translate3d(calc(-50% + var(--tx, 0px)), var(--ty, 0%), 0);
+  left: var(--x, 50%);     /* 中央。変えたければ 10%〜90% をJSで入れる */
+  top: -20%;               /* 画面上空スタート */
+  transform: translateX(-50%); /* 中央寄せだけtransformで */
   font-size:26px;
   filter: drop-shadow(0 2px 2px rgba(0,0,0,.25));
-  animation:
-    fall var(--t, 1400ms) linear forwards,          /* 縦：--ty を動かす */
+  animation: fall var(--t, 1400ms) linear forwards;
 }
 
-/* ✅ 落下は「上空（-20%）→ 床下（+130%）」までしっかり移動 */
+/* ← translateをやめて、top を直接動かす */
 @keyframes fall{
-  from { --ty:-20%; opacity:.7; }
-  to   { --ty:130%; opacity:.95; }
+  to { top: 130%; opacity:.95; }  /* 部屋の床を超えて下まで抜ける */
 }
 
-}
 /* ========== 下パネル（非モーダル） ========== */
 .panel{
   background:var(--panel-wall);
