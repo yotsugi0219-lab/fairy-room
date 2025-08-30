@@ -1,264 +1,104 @@
-// ====== 状態 ======
-let mood=5, hunger=5, sleep=5, nuts=0;
-const max=5;
-
-// ====== 要素 ======
-const paramMood   = document.getElementById("param-mood");
-const paramHunger = document.getElementById("param-hunger");
-const paramSleep  = document.getElementById("param-sleep");
-const nutsEl      = document.getElementById("nuts");
-
-const sky   = document.getElementById("sky");
-const stand = document.getElementById("fairy-stand");
-const happy = document.getElementById("fairy-happy");
-const guest = document.getElementById("fairy-guest");
-
-const bubble = document.getElementById("bubble");
-const bubbleText = document.getElementById("bubble-text");
-const fx = document.getElementById("fx");
-const frameArt = document.getElementById("frameArt");
-
-const shop = document.getElementById("shop");
-const shopGrid = document.getElementById("shopGrid");
-
-// ====== 表示更新 ======
-function updateParams(){
-  paramMood.textContent   = "ｺﾞｷｹﾞﾝ: " + "♥️".repeat(mood);
-  paramHunger.textContent = "ｵﾅｶ: "   + "🍬".repeat(hunger);
-  paramSleep.textContent  = "ﾈﾑﾈﾑ: " + "💤".repeat(sleep);
-  nutsEl.textContent = String(nuts);
+:root{
+  --bg:#0f0f11;
+  --panel:#14161b;
+  --panel-border:#242832;
+  --ink:#f5f7fb;
+  --muted:#93a0b6;
+  --accent:#8aa6ff;
+  --pill:#21242c;
+  --shadow:rgba(0,0,0,.25);
+  --panel-wall:#14161b; /* ショップで変える壁紙色 */
 }
 
-// ====== 吹き出し ======
-function say(text, ms=1500){
-  bubbleText.textContent = text;
-  bubble.classList.remove("hidden");
-  clearTimeout(say._t);
-  say._t = setTimeout(()=> bubble.classList.add("hidden"), ms);
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body{ height:100%; }
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN",
+       "Yu Gothic","YuGothic","Noto Sans JP",sans-serif;
+  user-select:none;
 }
-const smallTalks = [
-  "ﾅﾃﾞﾅﾃﾞ…わるくない", "どんぐり…ひとつくれ", "む…いい光", "ｵﾔﾂの じかん？"
-];
+img{ -webkit-user-drag:none; user-select:none; pointer-events:none; }
 
-// ====== 自分のジャンプ（バンザイ） ======
-function fairyJump(){
-  stand.classList.add("hidden");
-  happy.classList.remove("hidden");
-  happy.classList.add("jump");
-  happy.addEventListener("animationend", ()=>{
-    happy.classList.remove("jump");
-    happy.classList.add("hidden");
-    stand.classList.remove("hidden");
-  }, {once:true});
+.wrap{ max-width:820px; margin:12px auto 64px; padding:0 12px; }
+
+.room{
+  position:relative; border-radius:16px; overflow:hidden;
+  background:#1a1f27; box-shadow:0 12px 24px var(--shadow);
+  aspect-ratio: 16 / 9; /* スマホでも崩れにくい */
 }
-stand.addEventListener("click", fairyJump);
-
-// ====== ｵﾔﾂ 演出：降下→口パク→バンザイ ======
-const eat1 = new Image(); eat1.src = "assets/fairy-eat1.png";
-const eat2 = new Image(); eat2.src = "assets/fairy-eat2.png";
-let hasEat=false; eat1.onload = eat2.onload = ()=> hasEat=true;
-
-function dropSnacks(count=7){
-  const emojis = ["🥮","🍒","🍬","🍪","🍓","🍇","🧁"];
-  for(let i=0;i<count;i++){
-    const s = document.createElement("span");
-    s.className = "snack";
-    s.textContent = emojis[Math.floor(Math.random()*emojis.length)];
-    const offset = (Math.random()*36 - 18);
-    s.style.left = `calc(50% + ${offset}%)`;
-    s.style.setProperty("--t", (0.9 + Math.random()*0.6) + "s");
-    s.style.animationDelay = (Math.random()*0.25) + "s";
-    fx.appendChild(s);
-    s.addEventListener("animationend", ()=> s.remove(), {once:true});
-  }
-}
-function playMouth(ms=1200){
-  if(!hasEat) return;
-  const origin = stand.src;
-  let i=0, seq=[eat1.src, eat2.src];
-  stand.src = seq[0];
-  const int = setInterval(()=>{ i=1-i; stand.src = seq[i]; }, 160);
-  setTimeout(()=>{ clearInterval(int); stand.src = origin; }, ms);
+.room img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.frame-art{ z-index:3; pointer-events:none; }
+.room-sky{ z-index:2; }
+.room-base{ z-index:1; }
+.fairy{
+  z-index:4; width:min(24%,180px); aspect-ratio: 1/1;
+  left:50%; bottom:8%; transform:translateX(-50%);
+  object-fit:contain; border-radius:12px;
 }
 
-// ====== ﾈﾝﾈ：後ろ向き→寝る→Zzz×2→回復 ======
-const BED = { left:"72%", bottom:"20%" };
-let originPos = null;
-function zzz(count=2){
-  for(let i=0;i<count;i++){
-    const s = document.createElement("span");
-    s.className = "zzz";
-    s.style.animationDelay = (i*0.6)+"s";
-    s.textContent = "💤";
-    fx.appendChild(s);
-    s.addEventListener("animationend", ()=> s.remove(), {once:true});
-  }
+/* セリフ */
+.say{
+  position:absolute; left:50%; bottom:12%;
+  transform:translate(-50%,0); z-index:5;
+  background:rgba(20,22,27,.9); border:1px solid var(--panel-border);
+  padding:8px 12px; border-radius:12px; font-size:14px;
 }
-function goSleep(){
-  if(!originPos){
-    const cs = getComputedStyle(stand);
-    originPos = { left:"50%", bottom: cs.bottom, width: cs.width };
-  }
-  // 後ろ向き（あれば）
-  fetch("assets/fairy-back.png",{method:"HEAD"}).then(r=>{
-    if(r.ok) stand.src = "assets/fairy-back.png";
-  });
-  // ベッド位置へ
-  stand.style.left = BED.left;
-  stand.style.bottom = BED.bottom;
-  stand.style.width = "min(22%,140px)";
+.hidden{ display:none; }
 
-  setTimeout(()=>{
-    fetch("assets/fairy-sleep.png",{method:"HEAD"}).then(r=>{
-      if(r.ok) stand.src = "assets/fairy-sleep.png";
-      zzz(2);
-      sleep = max; updateParams();
-      setTimeout(()=>{
-        stand.src = "assets/fairy-stand.png";
-        stand.style.left = originPos.left;
-        stand.style.bottom = originPos.bottom;
-        stand.style.width = originPos.width;
-      }, 1700);
-    });
-  }, 350);
+/* パネル */
+.panel{
+  background:var(--panel-wall);
+  border:1px solid var(--panel-border);
+  border-radius:16px; padding:14px; margin-top:12px;
+  box-shadow:0 8px 16px var(--shadow);
+}
+.panel.status{ font-size:18px; }
+.pill{
+  display:inline-flex; align-items:center; justify-content:center;
+  background:var(--pill); color:var(--ink);
+  border:1px solid var(--panel-border);
+  padding:10px 18px; border-radius:999px; margin:8px 10px 0 0;
+  font-weight:600;
 }
 
-// ====== ｵｷｬｸｻﾝ：3種からランダム、並んでぴょん ======
-function pickGuest(n=3){
-  const id = 1 + Math.floor(Math.random()*n);
-  return {
-    stand:`assets/fairy-guest${id}-stand.png`,
-    happy:`assets/fairy-guest${id}-happy.png`
-  };
+/* モーダル */
+.modal{
+  position:fixed; inset:0; z-index:20; display:flex;
+  align-items:center; justify-content:center;
+  background:rgba(0,0,0,.55);
 }
-function guestVisit(){
-  const g = pickGuest();
-  guest.src = g.stand;
-  guest.classList.remove("hidden");
-  // 並んで2回ぴょん
-  fairyJump();
-  setTimeout(()=> fairyJump(), 550);
-  // ゲストもバンザイで跳ねる風
-  setTimeout(()=>{
-    guest.src = g.happy;
-    guest.classList.add("jump");
-    guest.addEventListener("animationend", ()=>{
-      guest.classList.remove("jump");
-      guest.src = g.stand;
-    }, {once:true});
-  }, 80);
+.modal .modal-body{
+  width:min(92vw,720px); background:var(--panel);
+  border:1px solid var(--panel-border); border-radius:16px;
+  box-shadow:0 16px 32px var(--shadow); padding:12px;
+}
+.modal-head{ display:flex; align-items:center; justify-content:space-between; }
+.mini{ font-size:14px; padding:6px 12px; border-radius:10px; }
+.shop-grid{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:10px;
+}
+.shop-grid button{
+  padding:10px; border-radius:12px; background:#1c212a;
+  border:1px solid var(--panel-border); color:var(--ink);
+  min-height:64px;
+}
+.note{ color:var(--muted); }
 
-  mood = Math.min(max, mood+1);
-  nuts += 1;
-  updateParams();
-  say("ｵｷｬｸｻﾝ ｲﾗｯｼｬｲ", 1300);
-
-  setTimeout(()=> guest.classList.add("hidden"), 1800);
+/* スナック落下 */
+.snack-layer{
+  pointer-events:none; position:fixed; inset:0; z-index:30;
+  overflow:hidden; font-size:24px;
+}
+.snack{ position:absolute; top:-40px; }
+@keyframes fall {
+  to { transform:translateY(110vh) rotate(360deg); opacity:.9; }
 }
 
-// ====== ショップ（額＆パネル壁紙） ======
-const items = [
-  { id:"art-sky",    name:"空の絵",   cost:2, type:"frame", src:"assets/frame-sky.png" },
-  { id:"art-flower", name:"花の絵",   cost:3, type:"frame", src:"assets/frame-flower.png" },
-  { id:"art-moon",   name:"月の絵",   cost:4, type:"frame", src:"assets/frame-moon.png" },
-  { id:"panel-wood", name:"木目ﾊﾟﾈﾙ", cost:2, type:"panel", src:"assets/panel-wood.png" },
-  { id:"panel-fancy",name:"模様ﾊﾟﾈﾙ", cost:3, type:"panel", src:"assets/panel-fancy.png" }
-];
-function renderShop(){
-  shopGrid.innerHTML = "";
-  items.forEach(it=>{
-    const div = document.createElement("div");
-    div.className = "shop-item";
-    div.innerHTML = `
-      <div style="font-size:28px;margin:6px 0;">${it.type==="frame"?"🖼️":"🧩"}</div>
-      <div>${it.name}</div>
-      <div style="opacity:.7;">🌰 ${it.cost}</div>
-      <button data-id="${it.id}">こうにゅう</button>
-    `;
-    shopGrid.appendChild(div);
-  });
-  // 購入ハンドラ
-  shopGrid.querySelectorAll("button").forEach(btn=>{
-    btn.onclick = ()=>{
-      const it = items.find(i=>i.id===btn.dataset.id);
-      if(!it) return;
-      if(nuts < it.cost){ say("…どんぐり たりない", 1000); return; }
-      nuts -= it.cost; updateParams();
-      if(it.type==="frame"){
-        frameArt.src = it.src; frameArt.classList.remove("hidden");
-        saveGame(); say("いい えらび", 1000);
-      }else if(it.type==="panel"){
-        document.documentElement.style.setProperty("--panel-bg", `url('${it.src}')`);
-        document.documentElement.style.setProperty("--panel-bg-size", `auto 100%`);
-        saveGame(); say("かわいく なった", 1000);
-      }
-    };
-  });
+/* ふわジャンプ */
+@keyframes pop {
+  0%{ transform:translate(-50%,0) scale(1); }
+  30%{ transform:translate(-50%,-22%) scale(1.05); }
+  60%{ transform:translate(-50%,0) scale(1); }
 }
-function openShop(){ renderShop(); shop.classList.remove("hidden"); }
-function closeShop(){ shop.classList.add("hidden"); }
-window.closeShop = closeShop; // HTMLの onclick から確実に呼べる
-
-document.getElementById("act-shop").onclick = openShop;
-// 背景クリックやEscで閉じる（保険）
-shop.addEventListener("click",(e)=>{ if(e.target.id==="shop") closeShop(); });
-document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") closeShop(); });
-// クリック委譲（さらに保険）
-document.addEventListener("click",(e)=>{ if(e.target && e.target.id==="shopClose") closeShop(); });
-
-// ====== 行動ボタン ======
-document.getElementById("act-pet").onclick = ()=>{
-  if(mood<max) mood++;
-  updateParams(); fairyJump(); say("…いまの、わるくない", 1200);
-};
-document.getElementById("act-snack").onclick = ()=>{
-  if(hunger<max) hunger++;
-  updateParams();
-  dropSnacks(7);                 // 上からおやつ
-  setTimeout(()=> playMouth(1200), 250); // 口パク
-  setTimeout(()=> fairyJump(), 1200);     // 〆にぴょん
-  say("もぐ… これ、好きかも", 1200);
-};
-document.getElementById("act-sleep").onclick = ()=>{ goSleep(); say("すこし… ねるね…", 1200); };
-document.getElementById("act-guest").onclick = guestVisit;
-document.getElementById("act-adventure").onclick = ()=>{
-  nuts++; if(mood>0) mood--; if(hunger>0) hunger--;
-  updateParams(); fairyJump();
-  say(smallTalks[Math.floor(Math.random()*smallTalks.length)], 1500);
-};
-
-// ====== 昼/夜切替 ======
-document.getElementById("toggle-sky").onclick = ()=>{
-  const isDay = sky.src.includes("sky-day");
-  sky.src = isDay ? sky.dataset.night : sky.dataset.day;
-};
-
-// ====== セーブ／ロード ======
-function saveGame(){
-  const panelBg = getComputedStyle(document.documentElement).getPropertyValue("--panel-bg").trim();
-  const data = {
-    mood,hunger,sleep,nuts,
-    frameSrc: frameArt.classList.contains("hidden") ? "" : frameArt.src,
-    panelBg
-  };
-  localStorage.setItem("fairyData", JSON.stringify(data));
-}
-document.getElementById("save").onclick = ()=>{ saveGame(); alert("日記に書いたよ ✍️"); };
-
-(function load(){
-  const raw = localStorage.getItem("fairyData");
-  if(raw){
-    try{
-      const d = JSON.parse(raw);
-      mood=d.mood??5; hunger=d.hunger??5; sleep=d.sleep??5; nuts=d.nuts??0;
-      if(d.frameSrc){ frameArt.src=d.frameSrc; frameArt.classList.remove("hidden"); }
-      if(d.panelBg){
-        document.documentElement.style.setProperty("--panel-bg", d.panelBg);
-        if(d.panelBg.includes("url(")){
-          document.documentElement.style.setProperty("--panel-bg-size", `auto 100%`);
-        }
-      }
-    }catch(e){}
-  }
-  updateParams();
-})();
+.jump{ animation:pop .6s ease-out; }
