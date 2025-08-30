@@ -68,12 +68,13 @@ function applyBasePose() {
 const STATE = { isAway:false, guest:null };
 
 function tick() {
-  // 寝てる時は減らさない（寝姿判定は class で）
   const sleeping = fairy.classList.contains('sleeping');
-  if (!sleeping) {
+
+  if (!sleeping && !STATE.isAway) {
+    // ｵﾅｶだけ時間で減らす
     hunger = clamp(hunger - 1, 0, CFG.max);
-    sleep  = clamp(sleep  - 1, 0, CFG.max);
-    if (hunger === 0 || sleep === 0) mood = clamp(mood - 1, 0, CFG.max);
+    // ｹﾞﾝｷ(sleep)は時間経過で減らさない
+    if (hunger === 0) mood = clamp(mood - 1, 0, CFG.max);
   }
   updateView();
 
