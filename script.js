@@ -156,127 +156,119 @@ function dropSnack(onLanded) {
   if(el){ el.setAttribute('draggable','false'); el.addEventListener('dragstart', e=>e.preventDefault()); }
 });
 
-/* ===================== ボタン配線（入れ子なしの正解） ===================== */
-function saveGame(){
-  const data = {
-    mood, hunger, sleep, nuts,
-    skyState: sky.dataset.state,
-    panelWall: getComputedStyle(document.documentElement).getPropertyValue('--panel-wall').trim()
-  };
-  localStorage.setItem('fairy-room-v1', JSON.stringify(data));
-  say("｢ﾆｯｷ ﾆ ｶｲﾀ｣", 900);
-}
-
+/* ===================== ボタン配線（安全版） ===================== */
 (function wire(){
-  const on = (id, fn) => {
-  const b = document.getElementById(id);
-  if (!b) return;
+  // ここでエラーになったらすぐ気づけるように
+  try {
+    const on = (id, fn) => {
+      const b = document.getElementById(id);
+      if (!b) { console.warn('missing:', id); return; }
+      const handler = (e)=>{ e.preventDefault?.(); fn(e); };
+      b.addEventListener('pointerup', handler);  // タッチ/クリックを一本化
+      b.addEventListener('click', handler);      // 古い環境の保険
+    };
 
-  const handler = (e) => { e.preventDefault?.(); fn(e); };
-  // pointerup で一本化（タッチでもクリックでも1回だけ）
-  b.addEventListener('pointerup', handler);
-  // 古い環境用に click も残す
-  b.addEventListener('click', handler);
-};
-
-  // ﾅﾃﾞﾅﾃﾞ
-  on('act-pet', () => {
-    mood = clamp(mood+1, 0, CFG.max); updateView();
-    jump(); say(CFG.talk.pet);
-  });
-
-  // ｵﾔﾂ（+1回復＆ぴょん）
-  on('act-snack', () => {
-    dropSnack(() => {
-      hunger = clamp(hunger + 1, 0, CFG.max);
-      mood   = clamp(mood   + 1, 0, CFG.max);
-      updateView();
-      jump();
-      const lines = ['ｵｲｼｲ','ﾓｯﾄ','ｼｱﾜｾ','ｱﾘｶﾞﾄ','ﾑﾌﾌ'];
-      say(lines[Math.floor(Math.random()*lines.length)]);
+    // ﾅﾃﾞﾅﾃﾞ
+    on('act-pet', () => {
+      mood = clamp(mood+1, 0, CFG.max); updateView();
+      jump(); say(CFG.talk.pet);
     });
-  });
 
-  // ﾎﾞｳｹﾝ（行く→戻る）
-on('act-adventure', () => {
-  if (STATE.isAway) return;
-  if (fairy.classList.contains('sleeping')) { say("｢…ﾈﾃﾙ｣", 800); return; }
+    // ｵﾔﾂ（+1回復＆ぴょん）
+    on('act-snack', () => {
+      dropSnack(() => {
+        hunger = clamp(hunger+1, 0, CFG.max);
+        mood   = clamp(mood+1, 0, CFG.max);
+        updateView();
+        jump();
+        say(CFG.talk.snack);
+      });
+    });
 
-  STATE.isAway = true;
+    // ﾎﾞｳｹﾝ（出発コスト-2、戻ったら報告）
+    let ADV_BUSY = false;
+    on('act-adventure', () => {
+      if (ADV_BUSY || STATE.isAway) return;
+      if (fairy.classList.contains('sleeping')) { say("｢…ﾈﾃﾙ｣", 800); return; }
+      ADV_BUSY = true; STATE.isAway = true;
 
-  // 出発コスト：ｹﾞﾝｷ -2（下限0）
-  sleep = clamp(sleep - 2, 0, CFG.max);
-  updateView();
-  if (typeof applyBasePose === 'function') applyBasePose();
-  if (sleep === 0) say("｢…ﾁｮｯﾄ ﾂｶﾚﾀ｣", 800);
+      sleep = clamp(sleep-2, 0, CFG.max); updateView();
+      fairy.style.opacity = '0'; say("｢…ﾎﾞｳｹﾝ ｲｯﾃｸﾙ｣", 900);
 
-  fairy.style.opacity = '0';
-  say("｢…ﾎﾞｳｹﾝ ｲｯﾃｸﾙ｣", 900);
+      const trip = 3500 + Math.random()*3500;
+      setTimeout(() => {
+        try{
+          const gain = 1 + Math.floor(Math.random()*3);
+          nuts = clamp(nuts + gain, 0, 99);
+          mood = clamp(mood + 1, 0, CFG.max);
+          updateView();
+          fairy.style.opacity = '1'; jump();
+          say(`｢ﾄﾞﾝｸﾞﾘ ${gain}ｺ ﾐﾂｹﾀ｣`, 1200);
+        } finally {
+          STATE.isAway = false;
+          ADV_BUSY = false;
+        }
+      }, trip);
+    });
 
-  const trip = 3500 + Math.random()*3500;
-  setTimeout(() => {
-    const gain = 1 + Math.floor(Math.random()*3);
-    nuts = clamp(nuts + gain, 0, 99);
-    mood = clamp(mood + 1, 0, CFG.max);
-    updateView();
+    // ｵｷｬｸｻﾝ（実装済みなら）
+    on('act-guest', () => { if (typeof callGuest === 'function') callGuest(); });
 
-    fairy.style.opacity = '1';
-    jump();
-    say(`｢ﾄﾞﾝｸﾞﾘ ${gain}ｺ ﾐﾂｹﾀ｣`, 1200);
-    STATE.isAway = false;
-  }, trip);
-});
+    // ﾈﾝﾈ（全回復）
+    on('act-sleep', () => {
+      if (STATE.isAway) { say("｢…ﾏﾀﾞ ｶｴｯﾃﾅｲ｣", 900); return; }
+      fairy.classList.add('sleeping');
+      fairy.style.left = CFG.bedPos.left; fairy.style.bottom = CFG.bedPos.bottom;
+      fairy.src = "assets/fairy-sleep.png"; say(CFG.talk.sleepS, 900);
+      for(let i=0;i<2;i++) setTimeout(()=> say("｢💤｣", 600), 400 + i*700);
+      setTimeout(()=>{
+        sleep = CFG.max; mood = clamp(mood+1, 0, CFG.max); updateView();
+        fairy.classList.remove('sleeping');
+        fairy.style.left = "50%"; fairy.style.bottom = "8%";
+        fairy.src = "assets/fairy-stand.png";
+        if (typeof applyBasePose === 'function') applyBasePose();
+        say(CFG.talk.sleepE, 1000);
+      }, 2000);
+    });
 
-  // ｵｷｬｸｻﾝ（実装済みなら）
-  on('act-guest', () => { if (typeof callGuest === 'function') callGuest(); });
+    // 空の切替
+    on('act-sky', () => {
+      const state = sky.dataset.state || 'day';
+      if(state === 'day'){ sky.src = sky.dataset.night; sky.dataset.state = 'night'; }
+      else { sky.src = sky.dataset.day; sky.dataset.state = 'day'; }
+    });
 
-  // ﾈﾝﾈ
-  on('act-sleep', () => {
-    if (STATE.isAway) { say("｢…ﾏﾀﾞ ｶｴｯﾃﾅｲ｣", 900); return; }
-    fairy.classList.add('sleeping');
-    fairy.style.left   = CFG.bedPos.left;
-    fairy.style.bottom = CFG.bedPos.bottom;
-    fairy.src = "assets/fairy-sleep.png";
-    say(CFG.talk.sleepS, 900);
-    for(let i=0;i<2;i++) setTimeout(()=> say("｢💤｣", 600), 400 + i*700);
-    setTimeout(()=>{
-      sleep = CFG.max; mood = clamp(mood+1, 0, CFG.max); updateView();
-      fairy.classList.remove('sleeping');
-      fairy.style.left = "50%";
-      fairy.style.bottom = "8%";
-      fairy.src = "assets/fairy-stand.png";
-      if (typeof applyBasePose === 'function') applyBasePose();
-      say(CFG.talk.sleepE, 1000);
-    }, 2000);
-  });
+    // ｾｰﾌﾞ
+    const saveGame = ()=>{
+      const data = {
+        mood, hunger, sleep, nuts,
+        skyState: sky.dataset.state,
+        panelWall: getComputedStyle(document.documentElement).getPropertyValue('--panel-wall').trim()
+      };
+      localStorage.setItem('fairy-room-v1', JSON.stringify(data));
+      say("｢ﾆｯｷ ﾆ ｶｲﾀ｣", 900);
+    };
+    on('act-save', saveGame);
 
-  // 空の切替
-  on('act-sky', () => {
-    const state = sky.dataset.state || 'day';
-    if(state === 'day'){ sky.src = sky.dataset.night; sky.dataset.state = 'night'; }
-    else { sky.src = sky.dataset.day; sky.dataset.state = 'day'; }
-  });
+    // ｼｮｯﾌﾟ
+    on('act-shop', () => {
+      cmdPanel.classList.add('hidden');
+      renderShop();
+      shopPanel.classList.remove('hidden');
+      shopPanel.setAttribute('aria-hidden','false');
+    });
+    const close = document.getElementById('shop-close');
+    if (close) close.onclick = () => {
+      shopPanel.classList.add('hidden');
+      shopPanel.setAttribute('aria-hidden','true');
+      cmdPanel.classList.remove('hidden');
+    };
 
-  // ｾｰﾌﾞ
-  on('act-save', saveGame);
-
-  // ｼｮｯﾌﾟ開閉
-  on('act-shop', () => {
-    cmdPanel.classList.add('hidden');
-    renderShop();
-    shopPanel.classList.remove('hidden');
-    shopPanel.setAttribute('aria-hidden','false');
-  });
-  const close = document.getElementById('shop-close');
-  if (close) close.onclick = () => {
-    shopPanel.classList.add('hidden');
-    shopPanel.setAttribute('aria-hidden','true');
-    cmdPanel.classList.remove('hidden');
-  };
-
-  console.log('[wire] buttons ready');
+    console.log('[wire] buttons ready');
+  } catch(err){
+    console.error('[wire] failed:', err);
+  }
 })();
-
 
 // ===================== メモ：どんぐりの入手（後で実装予定） =====================
 // いまは 0 のまま運用。入手手段（ﾎﾞｳｹﾝ or ｵｷｬｸｻﾝ）を後段で足すね。
