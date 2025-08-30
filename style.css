@@ -49,6 +49,9 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
 /* 妖精（中央基準・暴れないclamp） */
 .fairy{
   z-index:4; position:absolute;
+  /* ▼ここを追加（または top/right を個別に） */
+  inset: auto;        /* ← これで .room img の inset:0 を打ち消す */
+  /* top:auto; right:auto; でもOK */
   left:50%; transform:translateX(-50%);
   bottom:8%;
   width:clamp(80px, 15vw, 128px);
