@@ -88,10 +88,10 @@ function dropSnack() {
 
   fx.appendChild(el);
 
-  // アニメ終了後に削除
-  el.addEventListener('animationend', () => el.remove());
-}
-
+el.addEventListener('animationend', () => {
+    el.remove();
+    if (typeof onLanded === 'function') onLanded();  // ← 着地後に実行
+  
 // iOSドラッグ無効（念のため）
 ["roomBase","sky","windowFrame","fairy"].forEach(id=>{
   const el = document.getElementById(id);
@@ -117,13 +117,22 @@ document.getElementById('act-snack').onclick = ()=>{
   const btn = document.getElementById('act-snack');
   if (btn) {
     btn.onclick = () => {
-      console.log('[click] snack');     // 到達ログ
-      // 状態更新があればここで（例：hunger-- など）
-      dropSnack();                       // ← 必ず呼ぶ
+      dropSnack(() => {
+        // ここが「受け取り後」！
+        // 例：パラメータ更新
+        hunger = clamp(hunger + 1, 0, CFG.max);
+        mood   = clamp(mood   + 1, 0, CFG.max);
+        updateView();
+
+        // 例：ぴょん（既存の jump() がある想定）
+        if (typeof jump === 'function') jump();
+
+        // 例：セリフ
+        const lines = ['ｵｲｼｲ','ﾓｯﾄ','ｼｱﾜｾ','ｱﾘｶﾞﾄ','ﾑﾌﾌ'];
+        if (typeof say === 'function') say(lines[Math.floor(Math.random()*lines.length)]);
+      });
     };
-    btn.ontouchstart = (e) => { e.preventDefault(); btn.click(); };
-  } else {
-    console.warn('#act-snack が見つからないよ');
+    btn.ontouchstart = (e)=>{ e.preventDefault(); btn.click(); };
   }
 }
 
