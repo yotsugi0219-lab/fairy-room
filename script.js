@@ -59,21 +59,32 @@ function applyBasePose() {
   if (/fairy-happy/.test(fairy.src)) return;
 
   const want = (mood <= 1)
-    ? 'assets/fairy_back.png'
+    ? 'assets/fairy-back.png'
     : 'assets/fairy-stand.png';
 
   if (!fairy.src.endsWith(want)) fairy.src = want;
-}
-/* ===== パラメータ自然変化（15秒に1回） ===== */
+}/* ===== パラメータ自然変化 ===== */
 const STATE = { isAway:false, guest:null };
 
-function tick() {
-  const sleeping = fairy.classList.contains('if (!sleeping && !STATE.isAway) {
-  hunger = clamp(hunger - 1, 0, CFG.max);  // おなかだけ減る
-  if (hunger === 0) mood = clamp(mood - 1, 0, CFG.max);
-}
+function tick(){
+  const sleeping = fairy.classList.contains('sleeping');
+
+  // 時間経過では「おなか」だけ減らす（留守/就寝中は減らさない）
+  if (!sleeping && !STATE.isAway) {
+    hunger = clamp(hunger - 1, 0, CFG.max);
+    if (hunger === 0) mood = clamp(mood - 1, 0, CFG.max);
+  }
+
   updateView();
 
+  // たまに独り言
+  if (Math.random() < 0.15 && !STATE.isAway && !STATE.guest) {
+    say(CFG.talk.idle, 1000);
+  }
+}
+
+// 30秒ごとに実行（好みで変えてOK）
+setInterval(tick, 30000);
   // いまの数値から「基本ポーズ」を決めて反映する
 function applyBasePose() {
   if (fairy.classList.contains('sleeping')) return;    // ねんね中は触らない
