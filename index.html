@@ -1,64 +1,85 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>妖精さん育成</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#0f0f11">
+  <title>妖精さん育成ミニ</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <main class="frame">
+    <section id="game" class="game" role="application" aria-label="妖精さん育成ゲーム">
+      <!-- ステージ（16:9固定領域） -->
+      <div id="stage" class="stage" aria-hidden="true">
+        <!-- 壁紙（ショップで色変更） -->
+        <div id="wallpaper" class="wallpaper" aria-hidden="true"></div>
+        <!-- 空（昼/夜トグルで差し替え） -->
+        <img id="sky" class="sky layer" src="assets/sky-day.png" alt="" draggable="false">
+        <!-- 室内ベース -->
+        <img id="room" class="room layer" src="assets/room-base.png" alt="お部屋" draggable="false">
+        <!-- 窓枠（透過中心から空が見える想定） -->
+        <img id="windowFrame" class="window layer" src="assets/window-frame.png" alt="" draggable="false">
+        <!-- 妖精さん -->
+        <img id="fairy" class="fairy" src="assets/fairy-stand.png" alt="妖精さん" draggable="false">
+        <!-- 眠気エフェクト -->
+        <div id="sleepZ" class="sleepZ" aria-hidden="true">💤</div>
+        <!-- おやつ落下用プレースホルダ -->
+        <div id="fx" class="fx" aria-hidden="true"></div>
+      </div>
 
-  <!-- 画面 -->
-  <main class="wrap">
-    <section class="room" id="room">
-      <img id="roomBase" class="room-base" src="assets/room-base.png" alt="">
-      <img id="sky" class="room-sky" src="assets/sky-day.png"
-           data-day="assets/sky-day.png" data-night="assets/sky-night.png" alt="">
-      <img id="frameArt" class="frame-art" src="assets/window-frame.png" alt="">
-      <img id="fairy" class="fairy" src="assets/fairy-stand.png" alt="ようせい">
-      <div id="say" class="say hidden"></div>
-    </section>
+      <!-- HUD（ステータス・所持どんぐり） -->
+      <div class="hud">
+        <div class="status">
+          <span class="label" aria-hidden="true">♥️</span>
+          <span id="stat-mood" class="value" aria-live="polite"></span>
+        </div>
+        <div class="status">
+          <span class="label" aria-hidden="true">🍬</span>
+          <span id="stat-sweets" class="value" aria-live="polite"></span>
+        </div>
+        <div class="status">
+          <span class="label" aria-hidden="true">💤</span>
+          <span id="stat-sleep" class="value" aria-live="polite"></span>
+        </div>
+        <div class="acorns" aria-live="polite" title="所持どんぐり">
+          🌰 <span id="acorns">0</span>
+        </div>
+      </div>
 
-    <!-- ステータス -->
-    <section class="panel status">
-      <div>ゴキゲン: <span id="mood">♥️♥️♥️♥️♥️</span></div>
-      <div>オナカ: <span id="hunger">🍬🍬🍬🍬🍬</span></div>
-      <div>ネムネム: <span id="sleep">💤💤💤💤💤</span></div>
-    </section>
-
-    <!-- コマンド -->
-    <section class="panel commands">
-      <button id="act-pet" class="pill">ナデナデ</button>
-      <button id="act-snack" class="pill">オヤツ</button>
-      <button id="act-sleep" class="pill">ネネ</button>
-      <button id="toggle-sky" class="pill">昼/夜</button>
-      <button id="act-shop" class="pill">ショップ</button>
-    </section>
-
-    <!-- 所持 -->
-    <section class="panel status">
-      <strong id="nuts">0</strong> 🌰
-      <button id="save" class="pill">日記(セーブ)</button>
+      <!-- コントローラ（タップしやすいPill） -->
+      <div class="controls">
+        <button id="btn-nade" class="pill" aria-label="なでなで">ﾅﾃﾞﾅﾃﾞ</button>
+        <button id="btn-oyatsu" class="pill" aria-label="おやつ">ｵﾔﾂ</button>
+        <button id="btn-nenne" class="pill" aria-label="ねんね">ﾈﾝﾈ</button>
+        <button id="btn-daynight" class="pill" aria-label="昼夜トグル">昼/夜</button>
+        <button id="btn-shop" class="pill" aria-label="ショップ">ｼｮｯﾌﾟ</button>
+      </div>
     </section>
   </main>
 
   <!-- ショップ（モーダル） -->
-  <div id="shop" class="modal hidden" aria-hidden="true">
-    <div class="modal-body">
-      <div class="modal-head">
-        <strong>ショップ</strong>
-        <button id="shopClose" class="mini" type="button" onclick="closeShop()">とじる</button>
+  <div id="shopModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="shopTitle">
+    <div class="backdrop" data-close="1"></div>
+    <div class="dialog">
+      <header class="dialog-head">
+        <h2 id="shopTitle">ショップ（壁紙）</h2>
+        <button id="shopClose" class="close" aria-label="閉じる">×</button>
+      </header>
+      <div class="dialog-body">
+        <p class="note">壁紙は1回ごとに<strong>🌰3</strong>。購入すると即適用されます。</p>
+        <ul class="wall-list" id="wallList" role="list">
+          <!-- JSで項目を埋め込み -->
+        </ul>
       </div>
-      <div id="shopGrid" class="shop-grid"></div>
-      <p class="note">🌰 を使ってパネル壁紙を買えるよ</p>
+      <footer class="dialog-foot">
+        <button class="pill alt" data-close="1">とじる</button>
+      </footer>
     </div>
   </div>
 
-  <!-- スナック落下用コンテナ -->
-  <div id="snackLayer" class="snack-layer"></div>
-
-  <script src="script.js"></script>
+  <script src="script.js" defer></script>
 </body>
 </html>
