@@ -171,6 +171,29 @@ function dropSnack(onLanded) {
       const lines = ['ｵｲｼｲ','ﾓｯﾄ','ｼｱﾜｾ','ｱﾘｶﾞﾄ','ﾑﾌﾌ'];
       say(lines[Math.floor(Math.random()*lines.length)]);
     });
+      on('act-adventure', () => {
+    if (STATE.isAway) return;
+    STATE.isAway = true;
+    // 留守演出
+    fairy.style.opacity = '0';
+    say("｢…ﾎﾞｳｹﾝ ｲｯﾃｸﾙ｣", 900);
+
+    const trip = 3500 + Math.random()*3500; // 3.5〜7秒くらい
+    setTimeout(() => {
+      const gain = 1 + Math.floor(Math.random()*3); // 1〜3個
+      nuts = clamp(nuts + gain, 0, 99);
+      mood = clamp(mood + 1, 0, CFG.max);
+      updateView();
+
+      // 帰還
+      fairy.style.opacity = '';
+      jump();
+      say(`｢ﾄﾞﾝｸﾞﾘ ${gain}ｺ ﾐﾂｹﾀ｣`, 1200);
+      STATE.isAway = false;
+    }, trip);
+  });
+
+  on('act-guest', () => callGuest());
   });
 
   on('act-sleep', () => {
