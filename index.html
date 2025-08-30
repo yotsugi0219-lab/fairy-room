@@ -10,52 +10,34 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="frame">
-    <section id="game" class="game" role="application" aria-label="妖精さん育成ゲーム">
-      <!-- ステージ（16:9固定領域） -->
-      <div id="stage" class="stage" aria-hidden="true">
-        <!-- 壁紙（ショップで色変更） -->
-        <div id="wallpaper" class="wallpaper" aria-hidden="true"></div>
-        <!-- 空（昼/夜トグルで差し替え） -->
-        <img id="sky" class="sky layer" src="assets/sky-day.png" alt="" draggable="false">
-        <!-- 室内ベース -->
-        <img id="room" class="room layer" src="assets/room-base.png" alt="お部屋" draggable="false">
-        <!-- 窓枠（透過中心から空が見える想定） -->
-        <img id="windowFrame" class="window layer" src="assets/window-frame.png" alt="" draggable="false">
-        <!-- 妖精さん -->
-        <img id="fairy" class="fairy" src="assets/fairy-stand.png" alt="妖精さん" draggable="false">
-        <!-- 眠気エフェクト -->
-        <div id="sleepZ" class="sleepZ" aria-hidden="true">💤</div>
-        <!-- おやつ落下用プレースホルダ -->
-        <div id="fx" class="fx" aria-hidden="true"></div>
-      </div>
+  <main id="app" class="app layout-wide"><!-- layout-wide / layout-tall を切替 -->
+    <!-- ===== ステージ（背景エリア） ===== -->
+    <section id="stage" class="stage" role="img" aria-label="お部屋">
+      <div id="wallpaper" class="wallpaper" aria-hidden="true"></div>
+      <img id="sky" class="sky layer" src="assets/sky-day.png" alt="" draggable="false">
+      <img id="room" class="room layer" src="assets/room-base.png" alt="お部屋" draggable="false">
+      <img id="windowFrame" class="window layer" src="assets/window-frame.png" alt="" draggable="false">
+      <img id="fairy" class="fairy" src="assets/fairy-stand.png" alt="妖精さん" draggable="false">
+      <div id="sleepZ" class="sleepZ" aria-hidden="true">💤</div>
+      <div id="fx" class="fx" aria-hidden="true"></div>
+    </section>
 
-      <!-- HUD（ステータス・所持どんぐり） -->
+    <!-- ===== パネル（背景の外） ===== -->
+    <section class="panel">
       <div class="hud">
-        <div class="status">
-          <span class="label" aria-hidden="true">♥️</span>
-          <span id="stat-mood" class="value" aria-live="polite"></span>
-        </div>
-        <div class="status">
-          <span class="label" aria-hidden="true">🍬</span>
-          <span id="stat-sweets" class="value" aria-live="polite"></span>
-        </div>
-        <div class="status">
-          <span class="label" aria-hidden="true">💤</span>
-          <span id="stat-sleep" class="value" aria-live="polite"></span>
-        </div>
-        <div class="acorns" aria-live="polite" title="所持どんぐり">
-          🌰 <span id="acorns">0</span>
-        </div>
+        <div class="status"><span class="label">♥️</span><span id="stat-mood" class="value"></span></div>
+        <div class="status"><span class="label">🍬</span><span id="stat-sweets" class="value"></span></div>
+        <div class="status"><span class="label">💤</span><span id="stat-sleep" class="value"></span></div>
+        <div class="acorns">🌰 <span id="acorns">0</span></div>
       </div>
 
-      <!-- コントローラ（タップしやすいPill） -->
       <div class="controls">
-        <button id="btn-nade" class="pill" aria-label="なでなで">ﾅﾃﾞﾅﾃﾞ</button>
-        <button id="btn-oyatsu" class="pill" aria-label="おやつ">ｵﾔﾂ</button>
-        <button id="btn-nenne" class="pill" aria-label="ねんね">ﾈﾝﾈ</button>
-        <button id="btn-daynight" class="pill" aria-label="昼夜トグル">昼/夜</button>
-        <button id="btn-shop" class="pill" aria-label="ショップ">ｼｮｯﾌﾟ</button>
+        <button id="btn-nade" class="pill">ﾅﾃﾞﾅﾃﾞ</button>
+        <button id="btn-oyatsu" class="pill">ｵﾔﾂ</button>
+        <button id="btn-nenne" class="pill">ﾈﾝﾈ</button>
+        <button id="btn-daynight" class="pill">昼/夜</button>
+        <button id="btn-shop" class="pill">ｼｮｯﾌﾟ</button>
+        <button id="btn-layout" class="pill ghost" title="レイアウト切替">画面</button>
       </div>
     </section>
   </main>
@@ -70,9 +52,7 @@
       </header>
       <div class="dialog-body">
         <p class="note">壁紙は1回ごとに<strong>🌰3</strong>。購入すると即適用されます。</p>
-        <ul class="wall-list" id="wallList" role="list">
-          <!-- JSで項目を埋め込み -->
-        </ul>
+        <ul class="wall-list" id="wallList" role="list"></ul>
       </div>
       <footer class="dialog-foot">
         <button class="pill alt" data-close="1">とじる</button>
