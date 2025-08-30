@@ -25,15 +25,17 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
   position:relative; width:100%; aspect-ratio:16/9;
   margin:10px auto; border-radius:16px; overflow:hidden;
   background:#1b1e25; box-shadow:0 12px 24px rgba(0,0,0,.25);
-}
-.room img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
-.room-base{ z-index:1; }
-/* 部屋の背景だけ横幅100%に。妖精は除外 */
-.room img:not(.fairy){
+}/* 背景レイヤだけに適用する版（妖精は含めない） */
+.room > img.room-base,
+.room > img.room-sky,
+.room > img.window-frame{
+  position:absolute;
+  inset:0;
   width:100%;
-  height:auto;
-  display:block;
+  height:100%;
+  object-fit:cover;
 }
+.room-base{ z-index:1; }
 
 /* 窓の空（位置は絵に合わせて％指定。必要なら微調整） */
 .room-sky{
