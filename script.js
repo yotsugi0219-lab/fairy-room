@@ -144,10 +144,8 @@ function dropSnack(onLanded) {
     const on = (id, fn) => {
       const b = document.getElementById(id);
       if (!b) { console.warn('missing:', id); return; }
-      const handler = (e)=>{ e.preventDefault?.(); fn(e); };
-      b.addEventListener('pointerup', handler);  // タッチ/クリックを一本化
-      b.addEventListener('click', handler);      // 古い環境の保険
-    };
+const handler = (e)=>{ e.preventDefault?.(); fn(e); };
+b.addEventListener('pointerup', handler);  // ←これだけでOK  };
 
     // ﾅﾃﾞﾅﾃﾞ
     on('act-pet', () => {
