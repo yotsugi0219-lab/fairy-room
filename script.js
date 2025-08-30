@@ -48,7 +48,7 @@ function say(pool, ms=1100){
 function updateView(){
   pvMood.textContent   = "♥️".repeat(mood);
   pvHunger.textContent = "🍬".repeat(hunger);
-  pvSleep.textContent  = "💤".repeat(sleep);
+  pvSleep.textContent  = "💪".repeat(sleep);  // ← ここを変更！
   nutsEl.textContent   = String(nuts);
 }
 /* ===== パラメータ自然変化（15秒に1回） ===== */
