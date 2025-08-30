@@ -68,6 +68,7 @@ function jump(){
     fairy.src = old.includes('fairy-happy') ? "assets/fairy-stand.png" : old;
   });
 }
+
 function dropSnack(onLanded) {
   const fx = document.getElementById('fx');
 
@@ -99,99 +100,82 @@ function dropSnack(onLanded) {
   if(el){ el.setAttribute('draggable','false'); el.addEventListener('dragstart', e=>e.preventDefault()); }
 });
 
-// ===================== ボタン配線 =====================
-document.getElementById('act-pet').onclick = ()=>{
-  mood = clamp(mood+1, 0, CFG.max); updateView();
-  jump(); say(CFG.talk.pet);
-};
+/* ===================== ボタン配線（これだけ残す） ===================== */
+(function wire(){
+  const on = (id, fn) => {
+    const b = document.getElementById(id);
+    if (!b) { console.warn('missing:', id); return; }
+    b.addEventListener('click', fn);
+    b.addEventListener('touchstart', e=>{ e.preventDefault(); fn(e); }, {passive:false});
+  };
 
-// --- おやつボタン ---
-{
-  const btn = document.getElementById('act-snack');
-  if (btn) {
-    btn.onclick = () => {
-      dropSnack(() => {
-        // ここが「受け取り後」！
-        // 例：パラメータ更新
-        hunger = clamp(hunger + 1, 0, CFG.max);
-        mood   = clamp(mood   + 1, 0, CFG.max);
-        updateView();
+  on('act-pet', () => {
+    mood = clamp(mood+1, 0, CFG.max); updateView();
+    jump(); say(CFG.talk.pet);
+  });
 
-        // 例：ぴょん（既存の jump() がある想定）
-        if (typeof jump === 'function') jump();
+  on('act-snack', () => {
+    dropSnack(() => {
+      hunger = clamp(hunger + 1, 0, CFG.max);
+      mood   = clamp(mood   + 1, 0, CFG.max);
+      updateView();
+      jump();
+      const lines = ['ｵｲｼｲ','ﾓｯﾄ','ｼｱﾜｾ','ｱﾘｶﾞﾄ','ﾑﾌﾌ'];
+      say(lines[Math.floor(Math.random()*lines.length)]);
+    });
+  });
 
-        // 例：セリフ
-        const lines = ['ｵｲｼｲ','ﾓｯﾄ','ｼｱﾜｾ','ｱﾘｶﾞﾄ','ﾑﾌﾌ'];
-        if (typeof say === 'function') say(lines[Math.floor(Math.random()*lines.length)]);
-      });
-    };
-    btn.ontouchstart = (e)=>{ e.preventDefault(); btn.click(); };
-  }
-}
-
-document.getElementById('act-sleep').onclick = ()=>{
-  // ﾈﾝﾈ開始
-  fairy.classList.add('sleeping');
-  fairy.style.left = CFG.bedPos.left;
-  fairy.style.bottom = CFG.bedPos.bottom;
-  fairy.src = "assets/fairy-sleep.png";
-  say(CFG.talk.sleepS, 900);
-  // Zzz 2回（簡易）
-  for(let i=0;i<2;i++){
+  on('act-sleep', () => {
+    fairy.classList.add('sleeping');
+    fairy.style.left   = CFG.bedPos.left;
+    fairy.style.bottom = CFG.bedPos.bottom;
+    fairy.src = "assets/fairy-sleep.png";
+    say(CFG.talk.sleepS, 900);
+    for(let i=0;i<2;i++) setTimeout(()=> say("｢💤｣", 600), 400 + i*700);
     setTimeout(()=>{
-      say("｢💤｣", 600);
-    }, 400 + i*700);
-  }
-  // 回復 → 元位置に戻す
-  setTimeout(()=>{
-    sleep = CFG.max; updateView();
-    fairy.classList.remove('sleeping');
-    fairy.style.left = "50%";
-    fairy.style.bottom = "8%";
-    fairy.src = "assets/fairy-stand.png";
-    say(CFG.talk.sleepE, 1000);
-  }, 2000);
-};
+      sleep = CFG.max; updateView();
+      fairy.classList.remove('sleeping');
+      fairy.style.left = "50%";
+      fairy.style.bottom = "8%";
+      fairy.src = "assets/fairy-stand.png";
+      say(CFG.talk.sleepE, 1000);
+    }, 2000);
+  });
 
-document.getElementById('act-sky').onclick = ()=>{
-  const state = sky.dataset.state || 'day';
-  if(state === 'day'){
-    sky.src = sky.dataset.night;
-    sky.dataset.state = 'night';
-  }else{
-    sky.src = sky.dataset.day;
-    sky.dataset.state = 'day';
-  }
-};
+  on('act-sky', () => {
+    const state = sky.dataset.state || 'day';
+    if(state === 'day'){ sky.src = sky.dataset.night; sky.dataset.state = 'night'; }
+    else { sky.src = sky.dataset.day; sky.dataset.state = 'day'; }
+  });
 
-// セーブ＆ロード（ローカルのみ）
-document.getElementById('act-save').onclick = saveGame;
-function saveGame(){
+  on('act-save', saveGame);
+  function saveGame(){
   const data = {
-    mood,hunger,sleep,nuts,
+    mood, hunger, sleep, nuts,
     skyState: sky.dataset.state,
-    panelWall: getComputedStyle(document.documentElement).getPropertyValue('--panel-wall').trim()
+    panelWall: getComputedStyle(document.documentElement)
+      .getPropertyValue('--panel-wall').trim()
   };
   localStorage.setItem('fairy-room-v1', JSON.stringify(data));
   say("｢ﾆｯｷ ﾆ ｶｲﾀ｣", 900);
 }
-(function restore(){
-  try{
-    const raw = localStorage.getItem('fairy-room-v1');
-    if(!raw) return;
-    const d = JSON.parse(raw);
-    mood=d.mood??5; hunger=d.hunger??5; sleep=d.sleep??5; nuts=d.nuts??0;
-    const st = d.skyState==='night' ? 'night' : 'day';
-    sky.dataset.state = st;
-    sky.src = st==='night' ? sky.dataset.night : sky.dataset.day;
-    if(d.panelWall){
-      document.documentElement.style.setProperty('--panel-wall', d.panelWall);
-    }
-    updateView();
-  }catch{}
-})();
-updateView();
 
+  on('act-shop', () => {
+    cmdPanel.classList.add('hidden');
+    renderShop();
+    shopPanel.classList.remove('hidden');
+    shopPanel.setAttribute('aria-hidden','false');
+  });
+
+  const close = document.getElementById('shop-close');
+  if (close) close.onclick = () => {
+    shopPanel.classList.add('hidden');
+    shopPanel.setAttribute('aria-hidden','true');
+    cmdPanel.classList.remove('hidden');
+  };
+
+  console.log('[wire] buttons ready');
+})();
 // ===================== インラインショップ =====================
 function renderShop(){
   shopGrid.innerHTML = "";
