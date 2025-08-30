@@ -142,11 +142,20 @@ function dropSnack(onLanded) {
   // ここでエラーになったらすぐ気づけるように
   try {
     const on = (id, fn) => {
-      const b = document.getElementById(id);
-      if (!b) { console.warn('missing:', id); return; }
-const handler = (e)=>{ e.preventDefault?.(); fn(e); };
-b.addEventListener('pointerup', handler);  // ←これだけでOK  };
+  const old = document.getElementById(id);
+  if (!old) { console.warn('missing:', id); return; }
 
+  // 既存のイベントをぜんぶ剥がす（クローン差し替え）
+  const fresh = old.cloneNode(true);
+  old.parentNode.replaceChild(fresh, old);
+
+  // 一本化：pointerupのみ
+  const handler = (e)=>{ e.preventDefault?.(); fn(e); };
+  fresh.addEventListener('pointerup', handler);
+
+  // 返り値として生の要素を返しておくと後で使いやすい
+  return fresh;
+};
     // ﾅﾃﾞﾅﾃﾞ
     on('act-pet', () => {
       mood = clamp(mood+1, 0, CFG.max); updateView();
