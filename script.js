@@ -197,27 +197,34 @@ function saveGame(){
   });
 
   // ﾎﾞｳｹﾝ（行く→戻る）
-  on('act-adventure', () => {
-    if (STATE.isAway) return;
-    if (fairy.classList.contains('sleeping')) { say("｢…ﾈﾃﾙ｣", 800); return; }
+on('act-adventure', () => {
+  if (STATE.isAway) return;
+  if (fairy.classList.contains('sleeping')) { say("｢…ﾈﾃﾙ｣", 800); return; }
 
-    STATE.isAway = true;
-    fairy.style.opacity = '0';
-    say("｢…ﾎﾞｳｹﾝ ｲｯﾃｸﾙ｣", 900);
+  STATE.isAway = true;
 
-    const trip = 3500 + Math.random()*3500;
-    setTimeout(() => {
-      const gain = 1 + Math.floor(Math.random()*3);
-      nuts = clamp(nuts + gain, 0, 99);
-      mood = clamp(mood + 1, 0, CFG.max);
-      updateView();
+  // 出発コスト：ｹﾞﾝｷ -2（下限0）
+  sleep = clamp(sleep - 2, 0, CFG.max);
+  updateView();
+  if (typeof applyBasePose === 'function') applyBasePose();
+  if (sleep === 0) say("｢…ﾁｮｯﾄ ﾂｶﾚﾀ｣", 800);
 
-      fairy.style.opacity = '1';
-      jump();
-      say(`｢ﾄﾞﾝｸﾞﾘ ${gain}ｺ ﾐﾂｹﾀ｣`, 1200);
-      STATE.isAway = false;
-    }, trip);
-  });
+  fairy.style.opacity = '0';
+  say("｢…ﾎﾞｳｹﾝ ｲｯﾃｸﾙ｣", 900);
+
+  const trip = 3500 + Math.random()*3500;
+  setTimeout(() => {
+    const gain = 1 + Math.floor(Math.random()*3);
+    nuts = clamp(nuts + gain, 0, 99);
+    mood = clamp(mood + 1, 0, CFG.max);
+    updateView();
+
+    fairy.style.opacity = '1';
+    jump();
+    say(`｢ﾄﾞﾝｸﾞﾘ ${gain}ｺ ﾐﾂｹﾀ｣`, 1200);
+    STATE.isAway = false;
+  }, trip);
+});
 
   // ｵｷｬｸｻﾝ（実装済みなら）
   on('act-guest', () => { if (typeof callGuest === 'function') callGuest(); });
