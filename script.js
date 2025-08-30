@@ -1,155 +1,294 @@
-// ====== 基本状態 ======
-let mood=5, hunger=5, sleep=5, nuts=0;
-const max=5;
+/* ====== 妖精さん育成ミニ：シンプル版 ====== */
+/* Safari(iOS)前提。ドラッグ無効・タップPill・16:9安全レイアウト。 */
 
-const sky = document.getElementById('sky');
-const fairy = document.getElementById('fairy');
-const sayBox = document.getElementById('say');
+(() => {
+  const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+  const $ = (q) => document.querySelector(q);
+  const $$ = (q) => Array.from(document.querySelectorAll(q));
 
-// ドラッグ無効
-['roomBase','sky','frameArt','fairy'].forEach(id=>{
-  const el = document.getElementById(id);
-  if(el){ el.setAttribute('draggable','false'); el.addEventListener('dragstart',e=>e.preventDefault()); }
-});
+  const STORAGE_KEY = 'yousei_minigame_v1';
 
-// ステータス表示
-function hearts(n){ return '♥️'.repeat(n); }
-function candies(n){ return '🍬'.repeat(n); }
-function sleeps(n){ return '💤'.repeat(n); }
-function updateParams(){
-  document.getElementById('mood').textContent   = hearts(mood);
-  document.getElementById('hunger').textContent = candies(hunger);
-  document.getElementById('sleep').textContent  = sleeps(sleep);
-  document.getElementById('nuts').textContent   = nuts;
-}
-updateParams();
+  // デフォルト状態
+  const defaultState = {
+    mood: 3,     // ♥️ 0..5
+    sweets: 2,   // 🍬 0..5
+    sleep: 3,    // 💤 0..5（ﾈﾝﾈで全回復）
+    acorns: 10,  // 🌰 初期どんぐり
+    isDay: true, // 昼/夜トグル
+    wallpaper: 'milk' // 壁紙キー
+  };
 
-// しゃべる
-function say(text,ms=1100){
-  sayBox.textContent = text;
-  sayBox.classList.remove('hidden');
-  setTimeout(()=>sayBox.classList.add('hidden'), ms);
-}
+  const state = load();
 
-// フェアリー演出
-function swap(src, dur=400){
-  const old = fairy.src;
-  fairy.src = src;
-  setTimeout(()=>fairy.src=old, dur);
-}
-function jump(){ fairy.classList.add('jump'); setTimeout(()=>fairy.classList.remove('jump'), 600); }
+  // DOM参照
+  const sky = $('#sky');
+  const fairy = $('#fairy');
+  const sleepZ = $('#sleepZ');
+  const fx = $('#fx');
+  const statMood = $('#stat-mood');
+  const statSweets = $('#stat-sweets');
+  const statSleep = $('#stat-sleep');
+  const acornEl = $('#acorns');
 
-// 昼夜
-document.getElementById('toggle-sky').onclick = ()=>{
-  const isDay = sky.src.includes('sky-day');
-  sky.src = isDay ? sky.dataset.night : sky.dataset.day;
-};
+  const btnNade = $('#btn-nade');
+  const btnOyatsu = $('#btn-oyatsu');
+  const btnNenne = $('#btn-nenne');
+  const btnDayNight = $('#btn-daynight');
+  const btnShop = $('#btn-shop');
 
-// ====== ボタン ======
-document.getElementById('act-pet').onclick = ()=>{
-  if(mood<max) mood++;
-  updateParams();
-  jump();
-  say('…いまの、わるくない');
-};
+  const shopModal = $('#shopModal');
+  const shopClose = $('#shopClose');
+  const wallList = $('#wallList');
 
-document.getElementById('act-snack').onclick = ()=>{
-  if(hunger<max) hunger++;
-  updateParams();
-  // 1) 上からおやつが降る
-  dropSnacks(7);
-  // 2) 口パク（happy差し替え）
-  swap('assets/fairy-happy.png', 400);
-  // 3) ぴょん
-  setTimeout(jump, 420);
-  say('おいしい！');
-};
+  // 壁紙候補（画像を増やさずCSSだけで変える）
+  const WALLPAPERS = [
+    { key: 'milk',  name: 'ミルク',  css: 'linear-gradient(180deg,#f7f8fc 0%,#eceff6 100%)', price: 3 },
+    { key: 'mint',  name: 'ミント',  css: 'linear-gradient(180deg,#e8f8f4 0%,#d9f1eb 100%)', price: 3 },
+    { key: 'navy',  name: 'ネイビー', css: 'linear-gradient(180deg,#0b1020 0%,#141c2c 100%)', price: 3 },
+  ];
 
-// スナック降下（絵文字だけでOK）
-function dropSnacks(count=5){
-  const layer = document.getElementById('snackLayer');
-  for(let i=0;i<count;i++){
-    const el = document.createElement('div');
-    el.className='snack';
-    el.textContent = Math.random()<.5 ? '🥮' : '🍒';
-    const left = Math.random()*90+5;
-    const dur = 1200 + Math.random()*900;
-    el.style.left = left+'vw';
-    el.style.animation = `fall ${dur}ms linear forwards`;
-    layer.appendChild(el);
-    setTimeout(()=>layer.removeChild(el), dur+100);
+  /* ---------- 初期化 ---------- */
+  applyWallpaper(state.wallpaper);
+  applyDayNight(state.isDay);
+  renderAll();
+
+  // 画像ドラッグ無効（念のため）
+  $$('img').forEach(img => {
+    img.addEventListener('dragstart', (e) => e.preventDefault(), { passive: true });
+  });
+
+  /* ---------- ボタン動作 ---------- */
+  btnNade.addEventListener('click', onNade);
+  btnOyatsu.addEventListener('click', onOyatsu);
+  btnNenne.addEventListener('click', onNenne);
+  btnDayNight.addEventListener('click', onDayNight);
+  btnShop.addEventListener('click', openShop);
+
+  // Escでモーダル閉
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeShop();
+  });
+
+  // モーダル背景・ボタンで閉じる（必ず閉まる仕様）
+  shopModal.addEventListener('click', (e) => {
+    if (e.target.dataset.close) closeShop();
+  });
+  shopClose.addEventListener('click', closeShop);
+
+  // 画面遷移/終了前に保存（保険）
+  window.addEventListener('beforeunload', save, { passive: true });
+
+  /* ---------- アクション実装 ---------- */
+
+  // 1) ﾅﾃﾞﾅﾃﾞ = ｺﾞｷｹﾞﾝ+1 + ジャンプ演出
+  function onNade() {
+    state.mood = clamp(state.mood + 1, 0, 5);
+    jumpFairy();
+    maybeBonusAcorn(0.15);
+    renderAll(); save();
   }
-}
 
-// ネンネ：ちょっとだけ演出 → ねむけ回復
-document.getElementById('act-sleep').onclick = async ()=>{
-  say('おふとん…');
-  // ふとんのほうへ寄った風に（簡易）
-  fairy.style.bottom = '18%';
-  setTimeout(()=>fairy.style.bottom='8%', 1000);
-  await new Promise(r=>setTimeout(r, 400));
-  say('💤', 1000);
-  await new Promise(r=>setTimeout(r, 1000));
-  sleep = max; updateParams();
-};
+  // 2) ｵﾔﾂ = 🍒/🥮が降下 → 口パク → ジャンプ
+  function onOyatsu() {
+    const emoji = Math.random() < 0.5 ? '🍒' : '🥮';
+    dropSnackToFairy(emoji).then(() => {
+      // 口パク（立ち→ハッピー→立ち）
+      mouthAnim(500);
+      state.sweets = clamp(state.sweets + 1, 0, 5);
+      jumpFairy();
+      maybeBonusAcorn(0.1);
+      renderAll(); save();
+    });
+  }
 
-// セーブ
-document.getElementById('save').onclick = ()=>{
-  const data = {mood,hunger,sleep,nuts, sky: sky.src, wall:getComputedStyle(document.documentElement).getPropertyValue('--panel-wall').trim()};
-  localStorage.setItem('fairy-room', JSON.stringify(data));
-  say('日記にかいたよ');
-};
-(function restore(){
-  const raw = localStorage.getItem('fairy-room');
-  if(!raw) return;
-  try{
-    const d = JSON.parse(raw);
-    mood=d.mood; hunger=d.hunger; sleep=d.sleep; nuts=d.nuts; 
-    if(d.sky) sky.src=d.sky;
-    if(d.wall) document.documentElement.style.setProperty('--panel-wall', d.wall);
-    updateParams();
-  }catch{}
+  // 3) ﾈﾝﾈ = 簡易移動 + 💤表示 + 睡眠全回復
+  function onNenne() {
+    // 窓の近くに少しだけ移動して寝たっぽい演出
+    // （安全：位置はtranslateXだけ調整）
+    const baseX = -50;        // 中央基準
+    const shift = Math.random() < 0.5 ? -20 : 20; // 左右どちらか
+    fairy.style.transition = 'transform .35s ease';
+    fairy.style.transform = `translateX(${baseX + shift}%)`;
+
+    // Zzz表示
+    sleepZ.classList.add('show');
+    setTimeout(() => sleepZ.classList.remove('show'), 1200);
+
+    // フル回復
+    state.sleep = 5;
+    // 戻す
+    setTimeout(() => {
+      fairy.style.transform = `translateX(${baseX}%)`;
+    }, 700);
+
+    renderAll(); save();
+  }
+
+  // 5) 昼/夜トグル（窓の画像切替）
+  function onDayNight() {
+    state.isDay = !state.isDay;
+    applyDayNight(state.isDay);
+    save();
+  }
+
+  /* ---------- ビジュアル補助 ---------- */
+
+  function jumpFairy() {
+    fairy.classList.remove('jump');
+    // リフローで再適用
+    // eslint-disable-next-line no-unused-expressions
+    fairy.offsetWidth;
+    fairy.classList.add('jump');
+  }
+
+  function mouthAnim(ms = 400) {
+    fairy.src = 'assets/fairy-happy.png';
+    setTimeout(() => { fairy.src = 'assets/fairy-stand.png'; }, ms);
+  }
+
+  function dropSnackToFairy(emoji) {
+    return new Promise((resolve) => {
+      const rectStage = $('#stage').getBoundingClientRect();
+      const rectFairy = fairy.getBoundingClientRect();
+
+      // 目標位置（妖精の口あたり：少し上）
+      const targetX = rectFairy.left + rectFairy.width * 0.5 - rectStage.left;
+      const targetY = rectFairy.top + rectFairy.height * 0.3 - rectStage.top;
+
+      const el = document.createElement('div');
+      el.className = 'drop';
+      el.textContent = emoji;
+      fx.appendChild(el);
+
+      // 開始位置：妖精の真上ちょいずれ
+      const startX = targetX + (Math.random() * 80 - 40);
+      const startY = -24; // ステージ上端外
+
+      el.style.left = `${startX}px`;
+      el.style.top = `0px`; // translateで制御
+      el.style.setProperty('--tx', `${targetX - startX}px`);
+      el.style.setProperty('--ty', `${targetY - 0}px`);
+
+      // 次フレームで落下
+      requestAnimationFrame(() => {
+        el.classList.add('land');
+        // 到達後、少しでフェード
+        setTimeout(() => {
+          el.classList.add('fade');
+          setTimeout(() => {
+            fx.removeChild(el);
+            resolve();
+          }, 180);
+        }, 820);
+      });
+    });
+  }
+
+  function applyDayNight(isDay) {
+    sky.src = isDay ? 'assets/sky-day.png' : 'assets/sky-night.png';
+  }
+
+  function applyWallpaper(key) {
+    const item = WALLPAPERS.find(w => w.key === key) || WALLPAPERS[0];
+    document.documentElement.style.setProperty('--wallpaper', item.css);
+  }
+
+  function renderAll() {
+    statMood.textContent = '♥️'.repeat(state.mood) + '・'.repeat(5 - state.mood);
+    statSweets.textContent = '🍬'.repeat(state.sweets) + '・'.repeat(5 - state.sweets);
+    statSleep.textContent = '💤'.repeat(state.sleep) + '・'.repeat(5 - state.sleep);
+    acornEl.textContent = String(state.acorns);
+  }
+
+  function maybeBonusAcorn(prob = 0.1) {
+    if (Math.random() < prob) {
+      state.acorns += 1;
+    }
+  }
+
+  /* ---------- ショップ ---------- */
+
+  function openShop() {
+    // リスト生成（毎回最新状態で）
+    wallList.innerHTML = '';
+    WALLPAPERS.forEach(item => {
+      const li = document.createElement('li');
+      li.className = 'wall';
+
+      const prev = document.createElement('div');
+      prev.className = 'preview';
+      prev.style.background = item.css;
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+
+      const name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = item.name;
+
+      const price = document.createElement('div');
+      price.className = 'price';
+      price.textContent = `🌰 ${item.price}`;
+
+      const btn = document.createElement('button');
+      btn.className = 'buy';
+      btn.textContent = '購入して適用';
+      btn.disabled = state.acorns < item.price;
+
+      btn.addEventListener('click', () => {
+        if (state.acorns >= item.price) {
+          state.acorns -= item.price;
+          state.wallpaper = item.key;
+          applyWallpaper(item.key);
+          renderAll(); save();
+        }
+      });
+
+      meta.appendChild(name);
+      meta.appendChild(price);
+      meta.appendChild(btn);
+
+      li.appendChild(prev);
+      li.appendChild(meta);
+      wallList.appendChild(li);
+    });
+
+    shopModal.classList.remove('hidden');
+    // フォーカスを閉じるボタンへ（VoiceOver配慮）
+    requestAnimationFrame(() => $('#shopClose').focus());
+  }
+
+  function closeShop() {
+    shopModal.classList.add('hidden');
+  }
+
+  /* ---------- ストレージ ---------- */
+
+  function save() {
+    // 7. ローカル保存（所持どんぐり・壁紙・ステータス・空の状態）
+    const data = {
+      mood: state.mood,
+      sweets: state.sweets,
+      sleep: state.sleep,
+      acorns: state.acorns,
+      isDay: state.isDay,
+      wallpaper: state.wallpaper
+    };
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (_) {
+      // 失敗しても致命ではない
+    }
+  }
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return { ...defaultState };
+      const parsed = JSON.parse(raw);
+      return { ...defaultState, ...parsed };
+    } catch (_) {
+      return { ...defaultState };
+    }
+  }
 })();
-
-// ====== ショップ ======
-const shop = document.getElementById('shop');
-const shopGrid = document.getElementById('shopGrid');
-// 壁紙候補（CSS色で安全運用）
-const items = [
-  { id:'wall-kraft', label:'クラフト', cost:2, type:'panel', wall:'#171a20' },
-  { id:'wall-navy',  label:'ネイビー', cost:2, type:'panel', wall:'#0f1524' },
-  { id:'wall-rose',  label:'ローズ',   cost:2, type:'panel', wall:'#1f1418' },
-];
-function renderShop(){
-  shopGrid.innerHTML = items.map(i=>`
-    <button data-id="${i.id}">
-      <div><strong>${i.label}</strong></div>
-      <div class="tiny">🌰×${i.cost}</div>
-    </button>
-  `).join('');
-}
-function openShop(){ renderShop(); shop.classList.remove('hidden'); }
-function closeShop(){ shop.classList.add('hidden');}
-
-// open/close配線（絶対閉じる）
-document.getElementById('act-shop').onclick = openShop;
-document.getElementById('shopClose').onclick = closeShop;
-shop.addEventListener('click', (e)=>{ if(e.target.id==='shop') closeShop(); });
-document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeShop(); });
-
-// 購入動作
-shopGrid.addEventListener('click', (e)=>{
-  const btn = e.target.closest('button'); if(!btn) return;
-  const it = items.find(x=>x.id===btn.dataset.id); if(!it) return;
-  if(nuts < it.cost){ say('…どんぐり たりない'); return; }
-  nuts -= it.cost; updateParams();
-  if(it.type==='panel'){
-    document.documentElement.style.setProperty('--panel-wall', it.wall);
-    saveAfterShop();
-    say('かわいく なった');
-  }
-});
-function saveAfterShop(){
-  // 状態も保存しておく
-  document.getElementById('save').click();
-}
