@@ -159,7 +159,17 @@ function dropSnack(onLanded) {
   if(el){ el.setAttribute('draggable','false'); el.addEventListener('dragstart', e=>e.preventDefault()); }
 });
 
-/* ===================== ボタン配線（これだけ残す） ===================== */
+/* ===================== ボタン配線（入れ子なしの正解） ===================== */
+function saveGame(){
+  const data = {
+    mood, hunger, sleep, nuts,
+    skyState: sky.dataset.state,
+    panelWall: getComputedStyle(document.documentElement).getPropertyValue('--panel-wall').trim()
+  };
+  localStorage.setItem('fairy-room-v1', JSON.stringify(data));
+  say("｢ﾆｯｷ ﾆ ｶｲﾀ｣", 900);
+}
+
 (function wire(){
   const on = (id, fn) => {
     const b = document.getElementById(id);
@@ -168,11 +178,13 @@ function dropSnack(onLanded) {
     b.addEventListener('touchstart', e=>{ e.preventDefault(); fn(e); }, {passive:false});
   };
 
+  // ﾅﾃﾞﾅﾃﾞ
   on('act-pet', () => {
     mood = clamp(mood+1, 0, CFG.max); updateView();
     jump(); say(CFG.talk.pet);
   });
 
+  // ｵﾔﾂ（+1回復＆ぴょん）
   on('act-snack', () => {
     dropSnack(() => {
       hunger = clamp(hunger + 1, 0, CFG.max);
@@ -182,21 +194,24 @@ function dropSnack(onLanded) {
       const lines = ['ｵｲｼｲ','ﾓｯﾄ','ｼｱﾜｾ','ｱﾘｶﾞﾄ','ﾑﾌﾌ'];
       say(lines[Math.floor(Math.random()*lines.length)]);
     });
-      on('act-adventure', () => {
+  });
+
+  // ﾎﾞｳｹﾝ（行く→戻る）
+  on('act-adventure', () => {
     if (STATE.isAway) return;
+    if (fairy.classList.contains('sleeping')) { say("｢…ﾈﾃﾙ｣", 800); return; }
+
     STATE.isAway = true;
-    // 留守演出
     fairy.style.opacity = '0';
     say("｢…ﾎﾞｳｹﾝ ｲｯﾃｸﾙ｣", 900);
 
-    const trip = 3500 + Math.random()*3500; // 3.5〜7秒くらい
+    const trip = 3500 + Math.random()*3500;
     setTimeout(() => {
-      const gain = 1 + Math.floor(Math.random()*3); // 1〜3個
+      const gain = 1 + Math.floor(Math.random()*3);
       nuts = clamp(nuts + gain, 0, 99);
       mood = clamp(mood + 1, 0, CFG.max);
       updateView();
 
-      // 帰還
       fairy.style.opacity = '1';
       jump();
       say(`｢ﾄﾞﾝｸﾞﾘ ${gain}ｺ ﾐﾂｹﾀ｣`, 1200);
@@ -204,10 +219,12 @@ function dropSnack(onLanded) {
     }, trip);
   });
 
-  on('act-guest', () => callGuest());
-  });
+  // ｵｷｬｸｻﾝ（実装済みなら）
+  on('act-guest', () => { if (typeof callGuest === 'function') callGuest(); });
 
+  // ﾈﾝﾈ
   on('act-sleep', () => {
+    if (STATE.isAway) { say("｢…ﾏﾀﾞ ｶｴｯﾃﾅｲ｣", 900); return; }
     fairy.classList.add('sleeping');
     fairy.style.left   = CFG.bedPos.left;
     fairy.style.bottom = CFG.bedPos.bottom;
@@ -215,40 +232,33 @@ function dropSnack(onLanded) {
     say(CFG.talk.sleepS, 900);
     for(let i=0;i<2;i++) setTimeout(()=> say("｢💤｣", 600), 400 + i*700);
     setTimeout(()=>{
-      sleep = CFG.max; updateView();
+      sleep = CFG.max; mood = clamp(mood+1, 0, CFG.max); updateView();
       fairy.classList.remove('sleeping');
       fairy.style.left = "50%";
       fairy.style.bottom = "8%";
       fairy.src = "assets/fairy-stand.png";
+      if (typeof applyBasePose === 'function') applyBasePose();
       say(CFG.talk.sleepE, 1000);
     }, 2000);
   });
 
+  // 空の切替
   on('act-sky', () => {
     const state = sky.dataset.state || 'day';
     if(state === 'day'){ sky.src = sky.dataset.night; sky.dataset.state = 'night'; }
     else { sky.src = sky.dataset.day; sky.dataset.state = 'day'; }
   });
 
+  // ｾｰﾌﾞ
   on('act-save', saveGame);
-  function saveGame(){
-  const data = {
-    mood, hunger, sleep, nuts,
-    skyState: sky.dataset.state,
-    panelWall: getComputedStyle(document.documentElement)
-      .getPropertyValue('--panel-wall').trim()
-  };
-  localStorage.setItem('fairy-room-v1', JSON.stringify(data));
-  say("｢ﾆｯｷ ﾆ ｶｲﾀ｣", 900);
-}
 
+  // ｼｮｯﾌﾟ開閉
   on('act-shop', () => {
     cmdPanel.classList.add('hidden');
     renderShop();
     shopPanel.classList.remove('hidden');
     shopPanel.setAttribute('aria-hidden','false');
   });
-
   const close = document.getElementById('shop-close');
   if (close) close.onclick = () => {
     shopPanel.classList.add('hidden');
@@ -258,48 +268,7 @@ function dropSnack(onLanded) {
 
   console.log('[wire] buttons ready');
 })();
-// ===================== インラインショップ =====================
-function renderShop(){
-  shopGrid.innerHTML = "";
-  CFG.shopItems.forEach(it=>{
-    const card = document.createElement('div');
-    card.className = 'shop-item';
-    card.innerHTML = `
-      <div style="font-size:26px;">🧩</div>
-      <div class="label">${it.label}</div>
-      <div class="price" style="opacity:.8;">🌰 ${it.cost}</div>
-      <button class="pill mini" data-id="${it.id}">こうにゅう</button>
-    `;
-    shopGrid.appendChild(card);
-  });
 
-  shopGrid.querySelectorAll('button[data-id]').forEach(btn=>{
-    btn.onclick = ()=>{
-      const it = CFG.shopItems.find(x=>x.id===btn.dataset.id);
-      if(!it) return;
-      if(nuts < it.cost){ say("｢…ﾄﾞﾝｸﾞﾘ ﾀﾘﾅｲ｣", 1000); return; }
-      nuts -= it.cost; updateView();
-      if(it.type === 'panel'){
-        document.documentElement.style.setProperty('--panel-wall', it.wall);
-        say("｢ｶﾜｲｸ ﾅｯﾀ｣", 900);
-      }
-      saveGame();
-    };
-  });
-}
-
-document.getElementById('act-shop').onclick = ()=>{
-  // コマンド帯を非表示 → ショップ帯を表示（非モーダル）
-  cmdPanel.classList.add('hidden');
-  renderShop();
-  shopPanel.classList.remove('hidden');
-  shopPanel.setAttribute('aria-hidden','false');
-};
-document.getElementById('shop-close').onclick = ()=>{
-  shopPanel.classList.add('hidden');
-  shopPanel.setAttribute('aria-hidden','true');
-  cmdPanel.classList.remove('hidden');
-};
 
 // ===================== メモ：どんぐりの入手（後で実装予定） =====================
 // いまは 0 のまま運用。入手手段（ﾎﾞｳｹﾝ or ｵｷｬｸｻﾝ）を後段で足すね。
