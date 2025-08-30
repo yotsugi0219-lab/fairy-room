@@ -64,6 +64,19 @@ function tick() {
   }
   updateView();
 
+  // いまの数値から「基本ポーズ」を決めて反映する
+function applyBasePose() {
+  if (fairy.classList.contains('sleeping')) return;    // ねんね中は触らない
+  if (/fairy-happy/.test(fairy.src)) return;           // ぴょん中の一時差し替えは尊重
+
+  const want = (mood <= 1)
+    ? 'assets/fairy-back.png'   // ごきげん低い → うしろ向き
+    : 'assets/fairy-stand.png'; // ふつう
+
+  // 同じなら触らない（無駄な再描画を避ける）
+  if (!fairy.src.endsWith(want)) fairy.src = want;
+}
+
   // たまに独り言
   if (Math.random() < 0.15 && !STATE.isAway && !STATE.guest) {
     say(CFG.talk.idle, 1000);
