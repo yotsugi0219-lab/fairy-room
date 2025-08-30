@@ -53,16 +53,6 @@ function updateView(){
   applyBasePose(); // ここで呼ぶ
 }
 
-// ごきげん低いときの差分
-function applyBasePose() {
-  if (fairy.classList.contains('sleeping')) return;
-  if (/fairy-happy/.test(fairy.src)) return;
-
-  const want = (mood <= 1)
-    ? 'assets/fairy-back.png'
-    : 'assets/fairy-stand.png';
-
-  if (!fairy.src.endsWith(want)) fairy.src = want;}
 /* ===== パラメータ自然変化 ===== */
 const STATE = { isAway:false, guest:null };
 
