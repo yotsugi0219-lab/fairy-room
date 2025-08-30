@@ -48,8 +48,10 @@ function say(pool, ms=1100){
 function updateView(){
   pvMood.textContent   = "♥️".repeat(mood);
   pvHunger.textContent = "🍬".repeat(hunger);
-  pvSleep.textContent  = "💪".repeat(sleep);  // ← ここを変更！
+  pvSleep.textContent  = "💪".repeat(sleep);   // 既にゲンキ表記にしてる想定
   nutsEl.textContent   = String(nuts);
+
+  applyBasePose();      // ← ここを追加
 }
 /* ===== パラメータ自然変化（15秒に1回） ===== */
 const STATE = { isAway:false, guest:null };
