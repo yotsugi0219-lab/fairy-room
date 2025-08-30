@@ -92,14 +92,33 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
 }
 
 /* おやつ落下レイヤ（部屋内） */
+/* 部屋内のエフェクトレイヤはそのまま */
 .fx{ position:absolute; inset:0; z-index:5; pointer-events:none; }
-.snack{
-  position:absolute; top:-10%; font-size:26px; filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));
-  animation: fall var(--t,1200ms) linear forwards, wiggle 700ms ease-in-out infinite alternate;
-}
-@keyframes fall{ to { transform: translateY(110%); opacity:.95; } }
-@keyframes wiggle{ from{transform:translateX(-6px)} to{transform:translateX(6px)} }
 
+/* 🍬おやつ：transform を CSS変数で“合成”する */
+.snack{
+  position:absolute;
+  top:0;                                   /* ← 原点は部屋の上端 */
+  left: var(--x, 50%);                     /* 生成時に --x を％で入れると妖精の上に落とせる */
+  transform: translate3d(calc(-50% + var(--tx, 0px)), var(--ty, 0%), 0);
+  font-size:26px;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,.25));
+  animation:
+    fall var(--t, 1400ms) linear forwards,          /* 縦：--ty を動かす */
+    wiggle 700ms ease-in-out infinite alternate;    /* 横：--tx を動かす */
+}
+
+/* ✅ 落下は「上空（-20%）→ 床下（+130%）」までしっかり移動 */
+@keyframes fall{
+  from { --ty:-20%; opacity:.7; }
+  to   { --ty:130%; opacity:.95; }
+}
+
+/* ✅ ふらふらは横方向だけ（--tx を使うので transform を上書きしない） */
+@keyframes wiggle{
+  from { --tx:-6px; }
+  to   { --tx: 6px; }
+}
 /* ========== 下パネル（非モーダル） ========== */
 .panel{
   background:var(--panel-wall);
