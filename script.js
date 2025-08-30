@@ -71,27 +71,40 @@ function jump(){
 
 function dropSnack(onLanded) {
   const fx = document.getElementById('fx');
+  if (!fx) return;
 
-  // おやつ候補
   const snacks = ['🥮','🍒','🍰','🍮','🍩'];
   const snack  = snacks[Math.floor(Math.random() * snacks.length)];
 
-  // 要素を作成
   const el = document.createElement('span');
   el.className = 'snack';
   el.textContent = snack;
 
-  // 速度・位置（固定）
-  el.style.setProperty('--t', '1400ms');
+  const duration = 1400; // ms 固定
+  el.style.setProperty('--t', duration + 'ms');
   el.style.setProperty('--x', '50%');
 
   fx.appendChild(el);
 
-  // ✅ ここをきちんと閉じる（});）
-  el.addEventListener('animationend', () => {
+  // 妖精の頭の高さを計算
+  const fairyRect = fairy.getBoundingClientRect();
+  const fxRect    = fx.getBoundingClientRect();
+  const fairyHeadY = fairyRect.top - fxRect.top;   // fx内でのY座標
+
+  const fxHeight  = fxRect.height;
+  const endY      = fxHeight * 1.3; // CSSアニメの最終位置130%
+  const startY    = -0.2 * fxHeight;
+  const targetY   = fairyHeadY;     // 妖精の頭位置で止めたい
+
+  // 目標まで落ちる割合
+  const ratio = (targetY - startY) / (endY - startY);
+  const timeToFairy = duration * ratio;
+
+  // その時点で消す
+  setTimeout(() => {
     el.remove();
     if (typeof onLanded === 'function') onLanded();
-  });
+  }, timeToFairy);
 }
 
 // iOSドラッグ無効（念のため）
