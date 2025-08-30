@@ -62,14 +62,14 @@ function applyBasePose() {
     ? 'assets/fairy-back.png'
     : 'assets/fairy-stand.png';
 
-  if (!fairy.src.endsWith(want)) fairy.src = want;
-}/* ===== パラメータ自然変化 ===== */
+  if (!fairy.src.endsWith(want)) fairy.src = want;}
+/* ===== パラメータ自然変化 ===== */
 const STATE = { isAway:false, guest:null };
 
 function tick(){
   const sleeping = fairy.classList.contains('sleeping');
 
-  // 時間経過では「おなか」だけ減らす（留守/就寝中は減らさない）
+  // 時間経過では「おなか」だけ減らす（留守/就寝中は止める）
   if (!sleeping && !STATE.isAway) {
     hunger = clamp(hunger - 1, 0, CFG.max);
     if (hunger === 0) mood = clamp(mood - 1, 0, CFG.max);
@@ -83,27 +83,7 @@ function tick(){
   }
 }
 
-// 30秒ごとに実行（好みで変えてOK）
-setInterval(tick, 30000);
-  // いまの数値から「基本ポーズ」を決めて反映する
-function applyBasePose() {
-  if (fairy.classList.contains('sleeping')) return;    // ねんね中は触らない
-  if (/fairy-happy/.test(fairy.src)) return;           // ぴょん中の一時差し替えは尊重
-
-  const want = (mood <= 1)
-    ? 'assets/fairy-back.png'   // ごきげん低い → うしろ向き
-    : 'assets/fairy-stand.png'; // ふつう
-
-  // 同じなら触らない（無駄な再描画を避ける）
-  if (!fairy.src.endsWith(want)) fairy.src = want;
-}
-
-  // たまに独り言
-  if (Math.random() < 0.15 && !STATE.isAway && !STATE.guest) {
-    say(CFG.talk.idle, 1000);
-  }
-}
-// 15秒ごとに実行
+// 30秒ごとに実行
 setInterval(tick, 30000);
 function swapFairy(src, dur=350){
   const old = fairy.src;
