@@ -28,6 +28,12 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
 }
 .room img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
 .room-base{ z-index:1; }
+/* 部屋の背景だけ横幅100%に。妖精は除外 */
+.room img:not(.fairy){
+  width:100%;
+  height:auto;
+  display:block;
+}
 
 /* 窓の空（位置は絵に合わせて％指定。必要なら微調整） */
 .room-sky{
