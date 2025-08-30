@@ -63,7 +63,7 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
 /* ﾈﾝﾈ時：ベッド中央にスナップ（必要に応じて微調整OK） */
 .fairy.sleeping {
   left:50%;
-  bottom:180%;
+  bottom:30%;
   transform:translateX(-160%); /* ← -50% から -60% にすると10%左寄せ */
   width:clamp(72px, 12vw, 108px);
 }
