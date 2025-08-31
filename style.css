@@ -84,14 +84,17 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
   font-size:14px;
 }
 /* デフォルト（妖精さんの位置） */
-.speech{
+.speech {
   position: absolute;
   left: 50%;
-  bottom: 33%;           /* ← 40%から少し下げて“前の高さ”に */
+  bottom: 36%;
   transform: translateX(-50%);
   z-index: 5;
   pointer-events: none;
-  max-width: 70%;        /* ← 70%だと横に広がって“上に見える”ので戻す */
+  max-width: 70%;   /* ← 最大幅だけ指定 */
+  padding: 6px 10px; /* ← テキストに余白をつける */
+  display: inline-block; /* ← 幅を中身に合わせるために追加 */
+  box-sizing: border-box;
 }
 
 /* ｵｷｬｸｻﾝが話すときは少し右に寄せる（そのままでOK） */
