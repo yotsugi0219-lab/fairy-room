@@ -86,9 +86,8 @@ function tick(){
 
 // 以前の interval が残っていたら止めてから、1本だけ張る
 if (window.__fairyTick) clearInterval(window.__fairyTick);
-window.__fairyTick = setInterval(tick, 30000);
-// 15秒ごとに実行
-setInterval(tick, 15000);
+window.__fairyTick = setInterval(tick, 20000);
+
 function swapFairy(src, dur=350){
   const old = fairy.src;
   fairy.src = src;
@@ -290,18 +289,7 @@ on('act-adventure', () => {
   on('act-save', saveGame);
 
   // ｼｮｯﾌﾟ開閉
-  on('act-shop', () => {
-    cmdPanel.classList.add('hidden');
-    renderShop();
-    shopPanel.classList.remove('hidden');
-    shopPanel.setAttribute('aria-hidden','false');
-  });
-  const close = document.getElementById('shop-close');
-  if (close) close.onclick = () => {
-    shopPanel.classList.add('hidden');
-    shopPanel.setAttribute('aria-hidden','true');
-    cmdPanel.classList.remove('hidden');
-  };
+ on('act-shop', () => openShop());
 
   console.log('[wire] buttons ready');
 })();
