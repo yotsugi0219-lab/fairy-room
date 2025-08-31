@@ -153,30 +153,28 @@ function dropSnack(onLanded) {
 function openShop(){
   if (!shopPanel || !cmdPanel) return;
 
-  // まずショップを確実に可視化
+  // 先にショップを見せる
   shopPanel.classList.remove('hidden');
   shopPanel.setAttribute('aria-hidden','false');
-  shopPanel.style.visibility = 'visible';
-  shopPanel.style.opacity    = '1';
 
-  // 1フレーム後にコマンド帯を隠す（レイアウト競合を回避）
-  requestAnimationFrame(()=>{
-    cmdPanel.classList.add('hidden');
-  });
+  // 1フレーム後にコマンド帯を隠す（描画競合よけ）
+  requestAnimationFrame(()=> cmdPanel.classList.add('hidden'));
 
-  // 中身作成
   renderShop();
 
-  // 閉じるボタン（毎回配線し直し）
+  // 閉じるボタンを毎回クリーンに配線
   const close = document.getElementById('shop-close');
   if (close){
     const fresh = close.cloneNode(true);
     close.parentNode.replaceChild(fresh, close);
-    fresh.addEventListener('click',(e)=>{ e.preventDefault(); closeShop(); }, {once:true});
+    fresh.addEventListener('click', (e)=>{ e.preventDefault?.(); closeShop(); });
   }
 
-  // 念のため表示位置へスクロール
-  shopPanel.scrollIntoView({block:'nearest'});
+  // ESCで閉じる（重複防止）
+  if (!window.__shopEsc){
+    window.__shopEsc = (e)=>{ if (e.key === 'Escape') closeShop(); };
+    window.addEventListener('keydown', window.__shopEsc);
+  }
 }
 
 function closeShop(){
@@ -186,18 +184,15 @@ function closeShop(){
   shopPanel.classList.add('hidden');
   shopPanel.setAttribute('aria-hidden','true');
 
-  // 1フレーム後にコマンド帯を表示（描画競合回避）
-  requestAnimationFrame(()=>{
-    cmdPanel.classList.remove('hidden');
-  });
+  // 1フレーム後にコマンド帯を出す
+  requestAnimationFrame(()=> cmdPanel.classList.remove('hidden'));
 
-  // ESCハンドラ解除（クリーンアップ）
+  // ESCハンドラ解除（ここを関数「内側」に）
   if (window.__shopEsc){
     window.removeEventListener('keydown', window.__shopEsc);
     window.__shopEsc = null;
   }
 }
-
 /* ===================== ボタン配線（入れ子なしの正解） ===================== */
 function saveGame(){
   const data = {
