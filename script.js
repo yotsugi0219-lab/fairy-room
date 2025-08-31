@@ -204,13 +204,36 @@ function saveGame(){
   say("｢ﾆｯｷ ﾆ ｶｲﾀ｣", 900);
 }
 
-(function wire(){
+((function wire(){
   const on = (id, fn) => {
     const b = document.getElementById(id);
     if (!b) { console.warn('missing:', id); return; }
-    b.addEventListener('click', fn);
-    b.addEventListener('touchstart', e=>{ e.preventDefault(); fn(e); }, {passive:false});
+    const handler = (e)=>{ e.preventDefault?.(); fn(e); };
+    b.addEventListener('pointerup', handler); // これだけでOK
   };
+
+  // …以下の on('act-xxx', ...) はそのまま…
+  on('act-pet', () => { mood = clamp(mood+1,0,CFG.max); updateView(); jump(); say(CFG.talk.pet); });
+  on('act-snack', () => {
+    dropSnack(() => {
+      hunger = clamp(hunger+1,0,CFG.max);
+      mood   = clamp(mood+1,0,CFG.max);
+      updateView(); jump(); say(CFG.talk.snack);
+    });
+  });
+  on('act-adventure', () => { /* いまの処理のまま */ });
+  on('act-guest', () => { if (typeof callGuest==='function') callGuest(); });
+  on('act-sleep', () => { /* いまの処理のまま */ });
+  on('act-sky',   () => {
+    const state = sky.dataset.state || 'day';
+    if(state==='day'){ sky.src = sky.dataset.night; sky.dataset.state='night'; }
+    else{ sky.src = sky.dataset.day; sky.dataset.state='day'; }
+  });
+  on('act-save',  saveGame);
+  on('act-shop',  openShop);
+
+  console.log('[wire] buttons ready');
+})();
 
   // ﾅﾃﾞﾅﾃﾞ
   on('act-pet', () => {
