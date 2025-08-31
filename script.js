@@ -59,7 +59,7 @@ function applyBasePose() {
   if (/fairy-happy/.test(fairy.src)) return;
 
   const want = (mood <= 1)
-    ? 'assets/fairy-back.png'
+    ? 'assets/fairy_back.png'
     : 'assets/fairy-stand.png';
 
   if (!fairy.src.endsWith(want)) fairy.src = want;
