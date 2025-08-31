@@ -222,6 +222,24 @@ function dropSnack(onLanded) {
   const el = document.getElementById(id);
   if(el){ el.setAttribute('draggable','false'); el.addEventListener('dragstart', e=>e.preventDefault()); }
 });
+// ゲスト画像マップ
+const GFX_GUEST = {
+  fuyao:   'assets/guest-fuyao.png',
+  fengxin: 'assets/guest-fengxin.png',
+  nanfeng:'assets/guest-nanfeng.png'
+};
+
+// ゲスト用スプライトを1度だけ用意
+let guestSprite = null;
+function ensureGuestSprite(){
+  if (guestSprite) return guestSprite;
+  guestSprite = document.createElement('img');
+  guestSprite.id = 'guestSprite';
+  guestSprite.className = 'guest';
+  guestSprite.alt = '';
+  fx.appendChild(guestSprite);
+  return guestSprite;
+}
 
 function show(el){
   if(!el) return;
