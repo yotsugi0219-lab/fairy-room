@@ -139,6 +139,45 @@ function jump(){
     fairy.src = old.includes('fairy-happy') ? "assets/fairy-stand.png" : old;
   });
 }
+function callGuest(){
+  if (STATE.isAway || STATE.guest) { say("｢…ｲﾏ ﾑｽﾞｶｼｲ｣", 800); return; }
+
+  // ランダムに選ぶ
+  const g = CFG.guests[Math.floor(Math.random() * CFG.guests.length)];
+  STATE.guest = g.id;
+
+  // 入室：他操作は無効化
+  disableControls();
+  say(`｢${g.label} ｷﾀ｣`, 900);
+
+  // プレゼント（1〜範囲）
+  const [min,max] = g.gift.nuts;
+  const gain = min + Math.floor(Math.random() * (max - min + 1));
+
+  // ちょっと間を置いて演出
+  setTimeout(() => {
+    nuts = clamp(nuts + gain, 0, 99);
+    mood = clamp(mood + (g.gift.mood || 0), 0, CFG.max);
+    updateView();
+    say(`｢ﾄﾞﾝｸﾞﾘ ${gain} ﾄﾞｳｿﾞ｣`, 1100);
+  }, 700);
+
+  // 雑談（ランダム）
+  setTimeout(() => {
+    const line = g.lines[Math.floor(Math.random() * g.lines.length)];
+    say(line, 1200);
+  }, 2000);
+
+  // 退室（クリーンアップ＋サイレント保存）
+  const stay = 3500 + Math.random()*2500;
+  if (callGuest._leaveTimer) clearTimeout(callGuest._leaveTimer);
+  callGuest._leaveTimer = setTimeout(() => {
+    STATE.guest = null;
+    enableControls();
+    say("｢ﾏﾀ ﾈ｣", 900);
+    if (typeof saveGame === 'function') saveGame(true); // ←しゃべらない保存
+  }, stay);
+}
 
 function dropSnack(onLanded) {
   const fx = document.getElementById('fx');
