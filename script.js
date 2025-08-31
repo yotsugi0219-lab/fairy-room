@@ -204,6 +204,17 @@ function renderShop(){
     fresh.onclick = (e)=>{ e.preventDefault?.(); closeShop(); };
   }
 }
+// 共通ヘルパー（存在チェック付き）
+function show(el){
+  if (!el) return;
+  el.classList.remove('hidden');
+  el.setAttribute('aria-hidden','false');
+}
+function hide(el){
+  if (!el) return;
+  el.classList.add('hidden');
+  el.setAttribute('aria-hidden','true');
+}
 function openShop(){
   if (!shopPanel || !cmdPanel) return;
 
