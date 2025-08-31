@@ -180,12 +180,10 @@ function hide(el){
   el.setAttribute('aria-hidden','true');
 }
 function renderShop(){
-  if (!shopGrid) return;
-  shopGrid.innerHTML = "";
-
-  CFG.shopItems.forEach(it=>{
+  shopGrid.innerHTML = '';   // ここで一度空にする
+  CFG.shopItems.forEach(it => {
     const card = document.createElement('div');
-    card.className = 'shop-item';
+    card.className = 'card';
     card.innerHTML = `
       <div style="font-size:26px;">🧩</div>
       <div class="label">${it.label}</div>
@@ -377,7 +375,7 @@ on('act-adventure', () => {
   });
 
   // ｾｰﾌﾞ
-  on('act-save', saveGame);
+  on('act-save', () => saveGame(false));
 
   // ｼｮｯﾌﾟ開閉
   on('act-shop', () => {
