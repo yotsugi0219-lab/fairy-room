@@ -271,16 +271,18 @@ function closeShop(){
 }
 
 /* ===================== ボタン配線（入れ子なしの正解） ===================== */
-function saveGame(){
+function saveGame(silent = false){
   const data = {
     mood, hunger, sleep, nuts,
     skyState: sky.dataset.state,
-    panelWall: getComputedStyle(document.documentElement).getPropertyValue('--panel-wall').trim()
+    panelWall: getComputedStyle(document.documentElement)
+                 .getPropertyValue('--panel-wall').trim()
   };
   localStorage.setItem('fairy-room-v1', JSON.stringify(data));
-  say("｢ﾆｯｷ ﾆ ｶｲﾀ｣", 900);
-}
 
+  // ← サイレント時はしゃべらない
+  if (!silent) say("｢ﾆｯｷ ﾆ ｶｲﾀ｣", 900);
+}
 (function wire(){
   const on = (id, fn) => {
     const b = document.getElementById(id);
