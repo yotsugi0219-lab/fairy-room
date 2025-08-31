@@ -186,17 +186,18 @@ function closeShop(){
   shopPanel.classList.add('hidden');
   shopPanel.setAttribute('aria-hidden','true');
 
-  // 1フレーム後にコマンド帯を出す
+  // 1フレーム後にコマンド帯を表示（描画競合回避）
   requestAnimationFrame(()=>{
     cmdPanel.classList.remove('hidden');
   });
-}
+
   // ESCハンドラ解除（クリーンアップ）
   if (window.__shopEsc){
     window.removeEventListener('keydown', window.__shopEsc);
     window.__shopEsc = null;
   }
 }
+
 /* ===================== ボタン配線（入れ子なしの正解） ===================== */
 function saveGame(){
   const data = {
