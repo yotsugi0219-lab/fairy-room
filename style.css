@@ -157,6 +157,6 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
   pointer-events: none;
   opacity: 0;
   transition: opacity .2s ease;
-  width: 110px;             /* 画像サイズに合わせて調整 */
+  width: 80px;             /* 画像サイズに合わせて調整 */
 }
 .guest.show { opacity: 1; }
