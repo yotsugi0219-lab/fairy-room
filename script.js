@@ -204,7 +204,8 @@ function renderShop(){
       }
       updateView();
       // セーブ関数がある前提。なければコメントアウトでもOK
-      if (typeof saveGame === 'function') saveGame();
+      updateView();
+if (typeof saveGame === 'function') saveGame(true); // ←サイレント保存
     };
   });
 
