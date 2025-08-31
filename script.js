@@ -205,14 +205,45 @@ function renderShop(){
   }
 }
 function openShop(){
-  renderShop();   // 先に中身を用意
-  show(shopPanel);
-  hide(cmdPanel);
+  if (!shopPanel || !cmdPanel) return;
+
+  // コマンド帯を隠す
+  cmdPanel.classList.add('hidden');
+
+  // ショップを表示
+  shopPanel.classList.remove('hidden');
+  shopPanel.setAttribute('aria-hidden','false');
+
+  renderShop();
+
+  // 閉じるボタン
+  const btn = document.getElementById('shop-close');
+  if (btn) {
+    btn.onclick = (e)=>{ e.preventDefault?.(); closeShop(); };
+  }
+
+  // ESCで閉じる
+  if (!window.__shopEsc) {
+    window.__shopEsc = (e)=>{ if (e.key === 'Escape') closeShop(); };
+    window.addEventListener('keydown', window.__shopEsc);
+  }
 }
 
 function closeShop(){
-  hide(shopPanel);
-  show(cmdPanel);
+  if (!shopPanel || !cmdPanel) return;
+
+  // ショップを隠す
+  shopPanel.classList.add('hidden');
+  shopPanel.setAttribute('aria-hidden','true');
+
+  // コマンド帯を見せる
+  cmdPanel.classList.remove('hidden');
+
+  // ESC解除
+  if (window.__shopEsc) {
+    window.removeEventListener('keydown', window.__shopEsc);
+    window.__shopEsc = null;
+  }
 }
 
 /* ===================== ボタン配線（入れ子なしの正解） ===================== */
