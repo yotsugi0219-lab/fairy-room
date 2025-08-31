@@ -10,6 +10,23 @@ const CFG = {
     sleepE: ["｢…ｽｯｷﾘ｣","｢ﾖｸ ﾈﾀ｣","｢ﾏﾀﾞ ﾈﾑｲ ｶﾓ｣"],
     idle:   ["｢ｷｮｳﾊ ｲｲﾃﾝｷ｣","｢ﾄﾞﾝｸﾞﾘ… ﾄﾞｺｶﾆ ﾅｲｶﾅ｣","｢ｵﾊﾅｼ ｼﾀｲ ｷﾌﾞﾝ｣","｢ﾌﾜｧ…｣"]
   },
+  guests: [
+  {
+    id: 'fuyao', label: 'ﾌｰﾔｵ',
+    gift: { nuts:[1,3], mood:+1 },
+    lines: ["｢ｷｮｳﾊ ｲｲｶｾﾞ｣","｢ｺﾚ ﾄﾞｳｿﾞ｣","｢ﾏﾀ ｱｿﾎﾞ｣"]
+  },
+  {
+    id: 'fengxin', label: 'ﾌｫﾝｼﾝ',
+    gift: { nuts:[1,2], mood:+1 },
+    lines: ["｢ｻｸｯ ﾄ ﾐﾂｹﾀ｣","｢ﾔﾏﾐﾁ ﾖｶｯﾀ｣","｢ｵﾊﾅｼ ｽﾙ?｣"]
+  },
+  {
+    id: 'nanfeng', label: 'ﾅﾝﾌｫﾝ',
+    gift: { nuts:[2,3], mood:+0 },
+    lines: ["｢ｺﾝﾆﾁﾊ｣","｢ｱﾒ ﾌﾘｿｳ｣","｢ｵﾐﾔｹﾞ ﾓｯﾃｷﾀ｣"]
+  }
+],
   shopItems: [
     { id:"wall-kraft", label:"ｸﾗﾌﾄ", cost:2, type:"panel", wall:"#171a20" },
     { id:"wall-navy",  label:"ﾈｲﾋﾞｰ", cost:2, type:"panel", wall:"#0f1524" },
