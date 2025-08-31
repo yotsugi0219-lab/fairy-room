@@ -86,8 +86,9 @@ function tick(){
 
 // 以前の interval が残っていたら止めてから、1本だけ張る
 if (window.__fairyTick) clearInterval(window.__fairyTick);
-window.__fairyTick = setInterval(tick, 20000);
-
+window.__fairyTick = setInterval(tick, 30000);
+// 15秒ごとに実行
+setInterval(tick, 15000);
 function swapFairy(src, dur=350){
   const old = fairy.src;
   fairy.src = src;
@@ -150,49 +151,6 @@ function dropSnack(onLanded) {
   if(el){ el.setAttribute('draggable','false'); el.addEventListener('dragstart', e=>e.preventDefault()); }
 });
 
-function openShop(){
-  if (!shopPanel || !cmdPanel) return;
-
-  // 先にショップを見せる
-  shopPanel.classList.remove('hidden');
-  shopPanel.setAttribute('aria-hidden','false');
-
-  // 1フレーム後にコマンド帯を隠す（描画競合よけ）
-  requestAnimationFrame(()=> cmdPanel.classList.add('hidden'));
-
-  renderShop();
-
-  // 閉じるボタンを毎回クリーンに配線
-  const close = document.getElementById('shop-close');
-  if (close){
-    const fresh = close.cloneNode(true);
-    close.parentNode.replaceChild(fresh, close);
-    fresh.addEventListener('click', (e)=>{ e.preventDefault?.(); closeShop(); });
-  }
-
-  // ESCで閉じる（重複防止）
-  if (!window.__shopEsc){
-    window.__shopEsc = (e)=>{ if (e.key === 'Escape') closeShop(); };
-    window.addEventListener('keydown', window.__shopEsc);
-  }
-}
-
-function closeShop(){
-  if (!shopPanel || !cmdPanel) return;
-
-  // 先にショップを隠す
-  shopPanel.classList.add('hidden');
-  shopPanel.setAttribute('aria-hidden','true');
-
-  // 1フレーム後にコマンド帯を出す
-  requestAnimationFrame(()=> cmdPanel.classList.remove('hidden'));
-
-  // ESCハンドラ解除（ここを関数「内側」に）
-  if (window.__shopEsc){
-    window.removeEventListener('keydown', window.__shopEsc);
-    window.__shopEsc = null;
-  }
-}
 /* ===================== ボタン配線（入れ子なしの正解） ===================== */
 function saveGame(){
   const data = {
@@ -204,36 +162,13 @@ function saveGame(){
   say("｢ﾆｯｷ ﾆ ｶｲﾀ｣", 900);
 }
 
-((function wire(){
+(function wire(){
   const on = (id, fn) => {
     const b = document.getElementById(id);
     if (!b) { console.warn('missing:', id); return; }
-    const handler = (e)=>{ e.preventDefault?.(); fn(e); };
-    b.addEventListener('pointerup', handler); // これだけでOK
+    b.addEventListener('click', fn);
+    b.addEventListener('touchstart', e=>{ e.preventDefault(); fn(e); }, {passive:false});
   };
-
-  // …以下の on('act-xxx', ...) はそのまま…
-  on('act-pet', () => { mood = clamp(mood+1,0,CFG.max); updateView(); jump(); say(CFG.talk.pet); });
-  on('act-snack', () => {
-    dropSnack(() => {
-      hunger = clamp(hunger+1,0,CFG.max);
-      mood   = clamp(mood+1,0,CFG.max);
-      updateView(); jump(); say(CFG.talk.snack);
-    });
-  });
-  on('act-adventure', () => { /* いまの処理のまま */ });
-  on('act-guest', () => { if (typeof callGuest==='function') callGuest(); });
-  on('act-sleep', () => { /* いまの処理のまま */ });
-  on('act-sky',   () => {
-    const state = sky.dataset.state || 'day';
-    if(state==='day'){ sky.src = sky.dataset.night; sky.dataset.state='night'; }
-    else{ sky.src = sky.dataset.day; sky.dataset.state='day'; }
-  });
-  on('act-save',  saveGame);
-  on('act-shop',  openShop);
-
-  console.log('[wire] buttons ready');
-})();
 
   // ﾅﾃﾞﾅﾃﾞ
   on('act-pet', () => {
@@ -317,7 +252,18 @@ on('act-adventure', () => {
   on('act-save', saveGame);
 
   // ｼｮｯﾌﾟ開閉
- on('act-shop', () => openShop());
+  on('act-shop', () => {
+    cmdPanel.classList.add('hidden');
+    renderShop();
+    shopPanel.classList.remove('hidden');
+    shopPanel.setAttribute('aria-hidden','false');
+  });
+  const close = document.getElementById('shop-close');
+  if (close) close.onclick = () => {
+    shopPanel.classList.add('hidden');
+    shopPanel.setAttribute('aria-hidden','true');
+    cmdPanel.classList.remove('hidden');
+  };
 
   console.log('[wire] buttons ready');
 })();
