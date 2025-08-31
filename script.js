@@ -18,6 +18,18 @@ const CFG = {
 };
 
 // ===================== 参照 =====================
+// （この行の直後あたりに置く → const fx = ... の次）
+const BACK_A = 'assets/fairy-back.png';
+const BACK_B = 'assets/fairy_back.png';
+let FAIRY_BACK = BACK_A;             // デフォはハイフン版
+
+// どっちが存在するか軽くチェックして、無ければスネーク版に切替
+(() => {
+  const probe = new Image();
+  probe.onload  = () => { FAIRY_BACK = BACK_A; };
+  probe.onerror = () => { FAIRY_BACK = BACK_B; };
+  probe.src = BACK_A;
+})();
 const sky   = document.getElementById('sky');
 const fairy = document.getElementById('fairy');
 const speech = document.getElementById('speech');
