@@ -91,7 +91,7 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
   transform: translateX(-50%);
   z-index: 5;
   pointer-events: none;
-  max-width: 55%;        /* ← 70%だと横に広がって“上に見える”ので戻す */
+  max-width: 70%;        /* ← 70%だと横に広がって“上に見える”ので戻す */
 }
 
 /* ｵｷｬｸｻﾝが話すときは少し右に寄せる（そのままでOK） */
