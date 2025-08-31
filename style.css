@@ -95,8 +95,16 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
 }
 
 /* ｵｷｬｸｻﾝが話すときは少し右に寄せる */
+:root{
+  --guest-offset: 90px;  /* 共通のオフセット値 */
+}
+
+.guest{
+  left: calc(50% + var(--guest-offset));
+}
+
 .speech.from-guest{
-  left: calc(50% + 90px); /* 妖精の右側に表示。画像サイズで ± 調整してね */
+  left: calc(50% + var(--guest-offset));
   transform: translateX(-50%);
 }
 
