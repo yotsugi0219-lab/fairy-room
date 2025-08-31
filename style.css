@@ -87,32 +87,23 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
 .speech{
   position: absolute;
   left: 50%;
-  bottom: 40%;            /* ←ちょい上に。被るなら 42〜45% へ調整 */
+  bottom: 36%;           /* ← 40%から少し下げて“前の高さ”に */
   transform: translateX(-50%);
   z-index: 5;
-  pointer-events: none;   /* 触ってもボタンが押せるように */
-  max-width: 70%;
+  pointer-events: none;
+  max-width: 60%;        /* ← 70%だと横に広がって“上に見える”ので戻す */
 }
 
-/* ｵｷｬｸｻﾝが話すときは少し右に寄せる */
-:root{
-  --guest-offset: 90px;  /* 共通のオフセット値 */
-}
-
-.guest{
-  left: calc(50% + var(--guest-offset));
-}
-
+/* ｵｷｬｸｻﾝが話すときは少し右に寄せる（そのままでOK） */
 .speech.from-guest{
-  left: calc(50% + var(--guest-offset));
+  left: calc(50% + 90px);
   transform: translateX(-50%);
 }
 
-/* 端末が小さいときはさらに上げる（任意） */
+/* 端末が小さいときだけ少し上げる（任意） */
 @media (max-width: 420px){
-  .speech{ bottom: 44%; }
+  .speech{ bottom: 40%; }   /* 好みで 38〜42% の間で微調整 */
 }
-
 .speech.hidden { display:none; }
 
 /* ✅ 妖精が寝姿のときだけ、吹き出しを上げる */
