@@ -152,14 +152,17 @@ function dropSnack(onLanded) {
 
 function openShop(){
   if (!shopPanel || !cmdPanel) return;
-  // まず表示させたい側だけ確実に見せる
+
+  // 先にショップを出す
   shopPanel.classList.remove('hidden');
   shopPanel.setAttribute('aria-hidden','false');
-  // それからコマンド帯を隠す
+
+  // その後コマンド帯を隠す
   cmdPanel.classList.add('hidden');
 
   renderShop();
-
+  …
+}
   // 閉じるボタンをここで確実に配線し直す（念のため毎回）
   const close = document.getElementById('shop-close');
   if (close){
