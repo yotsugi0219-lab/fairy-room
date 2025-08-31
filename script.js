@@ -153,38 +153,44 @@ function dropSnack(onLanded) {
 function openShop(){
   if (!shopPanel || !cmdPanel) return;
 
-  // 先にショップを出す
+  // まずショップを確実に可視化
   shopPanel.classList.remove('hidden');
   shopPanel.setAttribute('aria-hidden','false');
+  shopPanel.style.visibility = 'visible';
+  shopPanel.style.opacity    = '1';
 
-  // その後コマンド帯を隠す
-  cmdPanel.classList.add('hidden');
+  // 1フレーム後にコマンド帯を隠す（レイアウト競合を回避）
+  requestAnimationFrame(()=>{
+    cmdPanel.classList.add('hidden');
+  });
 
+  // 中身作成
   renderShop();
-  …
-}
-  // 閉じるボタンをここで確実に配線し直す（念のため毎回）
+
+  // 閉じるボタン（毎回配線し直し）
   const close = document.getElementById('shop-close');
   if (close){
-    // 古いリスナーを剥がす（事故の芽を摘む）
     const fresh = close.cloneNode(true);
     close.parentNode.replaceChild(fresh, close);
-    fresh.onclick = (e)=>{ e.preventDefault?.(); closeShop(); };
+    fresh.addEventListener('click',(e)=>{ e.preventDefault(); closeShop(); }, {once:true});
   }
 
-  // ESCで閉じる（重複防止付き）
-  if (!window.__shopEsc){
-    window.__shopEsc = (e)=>{ if (e.key === 'Escape') closeShop(); };
-    window.addEventListener('keydown', window.__shopEsc);
-  }
+  // 念のため表示位置へスクロール
+  shopPanel.scrollIntoView({block:'nearest'});
 }
 
 function closeShop(){
   if (!shopPanel || !cmdPanel) return;
+
+  // 先にショップを隠す
   shopPanel.classList.add('hidden');
   shopPanel.setAttribute('aria-hidden','true');
-  cmdPanel.classList.remove('hidden');
 
+  // 1フレーム後にコマンド帯を出す
+  requestAnimationFrame(()=>{
+    cmdPanel.classList.remove('hidden');
+  });
+}
   // ESCハンドラ解除（クリーンアップ）
   if (window.__shopEsc){
     window.removeEventListener('keydown', window.__shopEsc);
