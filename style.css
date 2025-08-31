@@ -148,10 +148,15 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
 .hidden{ display:none !important; }
 
 /* お客さんの見た目：左側に小さめでちょこん */
-.guest{
-  position:absolute; z-index:4; pointer-events:none;
-  left:28%; bottom:8%;
-  width:clamp(64px,12vw,108px); height:auto;
-  transform:translateX(-50%);
-  opacity:0;                    /* 登場演出のため最初は0 */
+/* ゲスト立ち絵 */
+.guest {
+  position: absolute;
+  left: calc(50% + 70px);   /* 妖精の右横に出す。好みで調整 */
+  bottom: 8%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .2s ease;
+  width: 110px;             /* 画像サイズに合わせて調整 */
 }
+.guest.show { opacity: 1; }
