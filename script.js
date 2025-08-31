@@ -139,46 +139,66 @@ function jump(){
     fairy.src = old.includes('fairy-happy') ? "assets/fairy-stand.png" : old;
   });
 }
+function jumpBoth(){
+  // まず妖精さん
+  jump();
+  // ゲストが居たら同じタイミングで小ジャンプ
+  if (guestSprite && guestSprite.classList.contains('show')) {
+    guestSprite.animate(
+      [
+        { transform:'translateX(-50%) translateY(0)' },
+        { transform:'translateX(-50%) translateY(-16px)' },
+        { transform:'translateX(-50%) translateY(0)' }
+      ],
+      { duration:420, easing:'ease-out' }
+    );
+  }
+}
 function callGuest(){
   if (STATE.isAway || STATE.guest) { say("｢…ｲﾏ ﾑｽﾞｶｼｲ｣", 800); return; }
 
-  // ランダムに選ぶ
   const g = CFG.guests[Math.floor(Math.random() * CFG.guests.length)];
   STATE.guest = g.id;
 
-  // 入室：他操作は無効化
+  // 画像表示
+  const sp = ensureGuestSprite();
+  sp.src = GFX_GUEST[g.id] || '';
+  sp.classList.add('show');
+
+  // 他操作無効
   disableControls();
   say(`｢${g.label} ｷﾀ｣`, 900);
 
-  // プレゼント（1〜範囲）
+  // プレゼント
   const [min,max] = g.gift.nuts;
   const gain = min + Math.floor(Math.random() * (max - min + 1));
 
-  // ちょっと間を置いて演出
   setTimeout(() => {
     nuts = clamp(nuts + gain, 0, 99);
     mood = clamp(mood + (g.gift.mood || 0), 0, CFG.max);
     updateView();
+    jumpBoth();                        // ★ 二人でぴょん！
     say(`｢ﾄﾞﾝｸﾞﾘ ${gain} ﾄﾞｳｿﾞ｣`, 1100);
   }, 700);
 
-  // 雑談（ランダム）
+  // 雑談
   setTimeout(() => {
     const line = g.lines[Math.floor(Math.random() * g.lines.length)];
     say(line, 1200);
+    jumpBoth();                        // ★ もう一回ぴょんしても可愛い
   }, 2000);
 
-  // 退室（クリーンアップ＋サイレント保存）
+  // 退室
   const stay = 3500 + Math.random()*2500;
   if (callGuest._leaveTimer) clearTimeout(callGuest._leaveTimer);
   callGuest._leaveTimer = setTimeout(() => {
     STATE.guest = null;
+    sp.classList.remove('show');       // フェードアウト
     enableControls();
     say("｢ﾏﾀ ﾈ｣", 900);
-    if (typeof saveGame === 'function') saveGame(true); // ←しゃべらない保存
+    if (typeof saveGame === 'function') saveGame(true);
   }, stay);
 }
-
 function dropSnack(onLanded) {
   const fx = document.getElementById('fx');
   if (!fx) return;
