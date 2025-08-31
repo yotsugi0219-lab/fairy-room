@@ -192,22 +192,25 @@ function renderShop(){
   });
 
   // 購入ボタン
-  shopGrid.querySelectorAll('button[data-id]').forEach(btn=>{
-    btn.onclick = ()=>{
-      const it = CFG.shopItems.find(x=>x.id===btn.dataset.id);
-      if(!it) return;
-      if(nuts < it.cost){ say("｢…ﾄﾞﾝｸﾞﾘ ﾀﾘﾅｲ｣", 1000); return; }
-      nuts = clamp(nuts - it.cost, 0, 99);
-      if(it.type === 'panel'){
-        document.documentElement.style.setProperty('--panel-wall', it.wall);
-        say("｢ｶﾜｲｸ ﾅｯﾀ｣", 900);
-      }
-      updateView();
-      // セーブ関数がある前提。なければコメントアウトでもOK
-      updateView();
-if (typeof saveGame === 'function') saveGame(true); // ←サイレント保存
-    };
-  });
+shopGrid.querySelectorAll('button[data-id]').forEach(btn=>{
+  btn.onclick = ()=>{
+    const it = CFG.shopItems.find(x=>x.id===btn.dataset.id);
+    if(!it) return;
+    if(nuts < it.cost){ say("｢…ﾄﾞﾝｸﾞﾘ ﾀﾘﾅｲ｣", 1000); return; }
+
+    nuts = clamp(nuts - it.cost, 0, 99);
+
+    if(it.type === 'panel'){
+      document.documentElement.style.setProperty('--panel-wall', it.wall);
+      say("｢ｶﾜｲｸ ﾅｯﾀ｣", 900);           // ← 購入時のセリフ
+    }
+
+    updateView();
+
+    // ★ここがポイント：サイレント保存にする
+    if (typeof saveGame === 'function') saveGame(true);
+  };
+});
 
   // 閉じるボタン（毎回つなぎ直し）
   const close = document.getElementById('shop-close');
