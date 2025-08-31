@@ -151,6 +151,70 @@ function dropSnack(onLanded) {
   if(el){ el.setAttribute('draggable','false'); el.addEventListener('dragstart', e=>e.preventDefault()); }
 });
 
+function show(el){
+  if(!el) return;
+  el.style.display = '';
+  el.classList.remove('hidden');
+  el.setAttribute('aria-hidden','false');
+}
+function hide(el){
+  if(!el) return;
+  el.style.display = 'none';
+  el.classList.add('hidden');
+  el.setAttribute('aria-hidden','true');
+}
+function renderShop(){
+  if (!shopGrid) return;
+  shopGrid.innerHTML = "";
+
+  CFG.shopItems.forEach(it=>{
+    const card = document.createElement('div');
+    card.className = 'shop-item';
+    card.innerHTML = `
+      <div style="font-size:26px;">🧩</div>
+      <div class="label">${it.label}</div>
+      <div class="price" style="opacity:.8;">🌰 ${it.cost}</div>
+      <button class="pill mini" data-id="${it.id}">こうにゅう</button>
+    `;
+    shopGrid.appendChild(card);
+  });
+
+  // 購入ボタン
+  shopGrid.querySelectorAll('button[data-id]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const it = CFG.shopItems.find(x=>x.id===btn.dataset.id);
+      if(!it) return;
+      if(nuts < it.cost){ say("｢…ﾄﾞﾝｸﾞﾘ ﾀﾘﾅｲ｣", 1000); return; }
+      nuts = clamp(nuts - it.cost, 0, 99);
+      if(it.type === 'panel'){
+        document.documentElement.style.setProperty('--panel-wall', it.wall);
+        say("｢ｶﾜｲｸ ﾅｯﾀ｣", 900);
+      }
+      updateView();
+      // セーブ関数がある前提。なければコメントアウトでもOK
+      if (typeof saveGame === 'function') saveGame();
+    };
+  });
+
+  // 閉じるボタン（毎回つなぎ直し）
+  const close = document.getElementById('shop-close');
+  if (close){
+    const fresh = close.cloneNode(true);
+    close.parentNode.replaceChild(fresh, close);
+    fresh.onclick = (e)=>{ e.preventDefault?.(); closeShop(); };
+  }
+}
+function openShop(){
+  renderShop();   // 先に中身を用意
+  show(shopPanel);
+  hide(cmdPanel);
+}
+
+function closeShop(){
+  hide(shopPanel);
+  show(cmdPanel);
+}
+
 /* ===================== ボタン配線（入れ子なしの正解） ===================== */
 function saveGame(){
   const data = {
