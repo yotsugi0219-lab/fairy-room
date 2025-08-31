@@ -88,7 +88,7 @@ function tick(){
 if (window.__fairyTick) clearInterval(window.__fairyTick);
 window.__fairyTick = setInterval(tick, 30000);
 // 15秒ごとに実行
-setInterval(tick, 30000);
+setInterval(tick, 15000);
 function swapFairy(src, dur=350){
   const old = fairy.src;
   fairy.src = src;
