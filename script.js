@@ -291,6 +291,14 @@ function closeShop(){
     window.__shopEsc = null;
   }
 }
+function disableControls(){
+  if (!cmdPanel) return;
+  cmdPanel.querySelectorAll('button').forEach(b => b.disabled = true);
+}
+function enableControls(){
+  if (!cmdPanel) return;
+  cmdPanel.querySelectorAll('button').forEach(b => b.disabled = false);
+}
 
 /* ===================== ボタン配線（入れ子なしの正解） ===================== */
 function saveGame(silent = false){
