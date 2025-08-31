@@ -83,6 +83,27 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
   box-shadow:0 6px 16px rgba(0,0,0,.35);
   font-size:14px;
 }
+/* デフォルト（妖精さんの位置） */
+.speech{
+  position: absolute;
+  left: 50%;
+  bottom: 40%;            /* ←ちょい上に。被るなら 42〜45% へ調整 */
+  transform: translateX(-50%);
+  z-index: 5;
+  pointer-events: none;   /* 触ってもボタンが押せるように */
+  max-width: 70%;
+}
+
+/* ｵｷｬｸｻﾝが話すときは少し右に寄せる */
+.speech.from-guest{
+  left: calc(50% + 90px); /* 妖精の右側に表示。画像サイズで ± 調整してね */
+  transform: translateX(-50%);
+}
+
+/* 端末が小さいときはさらに上げる（任意） */
+@media (max-width: 420px){
+  .speech{ bottom: 44%; }
+}
 
 .speech.hidden { display:none; }
 
