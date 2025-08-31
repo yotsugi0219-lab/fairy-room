@@ -71,10 +71,22 @@ let mood=5, hunger=5, sleep=5, nuts=0;
 
 // ===================== ユーティリティ =====================
 function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
-function say(pool, ms=1100){
-  const line = Array.isArray(pool) ? pool[Math.floor(Math.random()*pool.length)] : String(pool);
+function say(pool, ms = 1100, isGuest = false){
+  const line = Array.isArray(pool) ? pool[Math.floor(Math.random()*pool.length)] : pool;
+
+  // まず両方のクラスを外す
+  speech.classList.remove('fairy', 'guest');
+
+  // ゲストかどうかでクラスを付ける
+  if(isGuest){
+    speech.classList.add('guest');
+  } else {
+    speech.classList.add('fairy');
+  }
+
   speechText.textContent = line;
   speech.classList.remove('hidden');
+
   clearTimeout(say._t);
   say._t = setTimeout(()=> speech.classList.add('hidden'), ms);
 }
