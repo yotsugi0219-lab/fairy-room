@@ -151,6 +151,44 @@ function dropSnack(onLanded) {
   if(el){ el.setAttribute('draggable','false'); el.addEventListener('dragstart', e=>e.preventDefault()); }
 });
 
+function openShop(){
+  if (!shopPanel || !cmdPanel) return;
+  // まず表示させたい側だけ確実に見せる
+  shopPanel.classList.remove('hidden');
+  shopPanel.setAttribute('aria-hidden','false');
+  // それからコマンド帯を隠す
+  cmdPanel.classList.add('hidden');
+
+  renderShop();
+
+  // 閉じるボタンをここで確実に配線し直す（念のため毎回）
+  const close = document.getElementById('shop-close');
+  if (close){
+    // 古いリスナーを剥がす（事故の芽を摘む）
+    const fresh = close.cloneNode(true);
+    close.parentNode.replaceChild(fresh, close);
+    fresh.onclick = (e)=>{ e.preventDefault?.(); closeShop(); };
+  }
+
+  // ESCで閉じる（重複防止付き）
+  if (!window.__shopEsc){
+    window.__shopEsc = (e)=>{ if (e.key === 'Escape') closeShop(); };
+    window.addEventListener('keydown', window.__shopEsc);
+  }
+}
+
+function closeShop(){
+  if (!shopPanel || !cmdPanel) return;
+  shopPanel.classList.add('hidden');
+  shopPanel.setAttribute('aria-hidden','true');
+  cmdPanel.classList.remove('hidden');
+
+  // ESCハンドラ解除（クリーンアップ）
+  if (window.__shopEsc){
+    window.removeEventListener('keydown', window.__shopEsc);
+    window.__shopEsc = null;
+  }
+}
 /* ===================== ボタン配線（入れ子なしの正解） ===================== */
 function saveGame(){
   const data = {
