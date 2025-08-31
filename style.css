@@ -182,3 +182,4 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
   transition: opacity .2s ease;
   width: 85px;             /* 画像サイズに合わせて調整 */
 }
+.guest.show { opacity: 1; }
