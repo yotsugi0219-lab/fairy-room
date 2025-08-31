@@ -87,11 +87,11 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
 .speech{
   position: absolute;
   left: 50%;
-  bottom: 36%;           /* ← 40%から少し下げて“前の高さ”に */
+  bottom: 33%;           /* ← 40%から少し下げて“前の高さ”に */
   transform: translateX(-50%);
   z-index: 5;
   pointer-events: none;
-  max-width: 60%;        /* ← 70%だと横に広がって“上に見える”ので戻す */
+  max-width: 55%;        /* ← 70%だと横に広がって“上に見える”ので戻す */
 }
 
 /* ｵｷｬｸｻﾝが話すときは少し右に寄せる（そのままでOK） */
@@ -177,7 +177,7 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
   pointer-events: none;
   opacity: 0;
   transition: opacity .2s ease;
-  width: 80px;             /* 画像サイズに合わせて調整 */
+  width: 85px;             /* 画像サイズに合わせて調整 */
 }
 .guest.show { opacity: 1; }
 /* ===== 吹き出しの位置分け ===== */
