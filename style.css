@@ -181,3 +181,19 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
   width: 80px;             /* 画像サイズに合わせて調整 */
 }
 .guest.show { opacity: 1; }
+/* ===== 吹き出しの位置分け ===== */
+.speech {
+  position: absolute;
+  bottom: 140px;   /* 高さは固定でOK */
+  transform: translateX(-50%);
+}
+
+/* 妖精さん用（左寄り） */
+.speech.fairy {
+  left: 45%;
+}
+
+/* お客さん用（右寄り） */
+.speech.guest {
+  left: 65%;
+}
