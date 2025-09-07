@@ -330,24 +330,31 @@ function renderShop(){
 
   // 購入ボタン
 shopGrid.querySelectorAll('button[data-id]').forEach(btn=>{
-  btn.onclick = ()=>{
-    const it = CFG.shopItems.find(x=>x.id===btn.dataset.id);
-    if(!it) return;
-    if(nuts < it.cost){ say("｢…ﾄﾞﾝｸﾞﾘ ﾀﾘﾅｲ｣", 1000); return; }
+  btn.onclick = () => {
+  const id = btn.dataset.id;
+  const it = CFG.shopItems.find(x => x.id === id);
+  if (!it) return;
 
-    nuts = clamp(nuts - it.cost, 0, 99);
+  if (nuts < it.cost) { say("｢…ﾄﾞﾝｸﾞﾘ ﾀﾘﾅｲ｣", 1000); return; }
+  nuts = clamp(nuts - it.cost, 0, 99);
 
-    if(it.type === 'panel'){
-      document.documentElement.style.setProperty('--panel-wall', it.wall);
-      say("｢ｶﾜｲｸ ﾅｯﾀ｣", 900);           // ← 購入時のセリフ
-    }
+  if (it.type === 'panel') {
+    // 壁紙（下帯）を反映
+    document.documentElement.style.setProperty('--panel-wall', it.wall);
+    say("｢ｶﾜｲｸ ﾅｯﾀ｣", 900);
+  } else if (it.type === 'decor') {
+    // 家具を反映（スロットに画像を表示）
+    const slotIdMap = { poster:'slot-poster', rug:'slot-rug', tabletop:'slot-tabletop' };
+    const img = document.getElementById(slotIdMap[it.slot]);
+    if (img) { img.src = it.src; img.style.display = 'block'; }
+    // 状態（保存用）
+    decor[it.slot] = it.id;
+    say("｢ｲｲｶﾝｼﾞ｣", 900);
+  }
 
-    updateView();
-
-    // ★ここがポイント：サイレント保存にする
-    if (typeof saveGame === 'function') saveGame(true);
-  };
-});
+  updateView();
+  if (typeof saveGame === 'function') saveGame(true); // サイレント保存
+};
 
   // 閉じるボタン（毎回つなぎ直し）
   const close = document.getElementById('shop-close');
