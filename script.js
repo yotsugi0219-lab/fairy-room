@@ -28,19 +28,23 @@ const CFG = {
   }
 ],
   shopItems: [
-    { id:"wall-kraft", label:"ｸﾗﾌﾄ", cost:2, type:"panel", wall:"#171a20" },
-    { id:"wall-navy",  label:"ﾈｲﾋﾞｰ", cost:2, type:"panel", wall:"#0f1524" },
-    { id:"wall-rose",  label:"ﾛｰｽﾞ",  cost:2, type:"panel", wall:"#1f1418" },// ここから追加分
-    { id:"wall-mint",   label:"ﾐﾝﾄ",   cost:2, type:"panel", wall:"#12332b" },
-    { id:"wall-sakura", label:"ｻｸﾗ",   cost:2, type:"panel", wall:"#2a1b23" },
-    { id:"wall-cream",  label:"ｸﾘｰﾑ",  cost:2, type:"panel", wall:"#2c2418" },
-    { id:"wall-ink",    label:"ｲﾝｸ",   cost:3, type:"panel", wall:"#0b0f16" },
-      { id:"poster_sakura", label:"ｻｸﾗのﾎﾟｽﾀｰ", cost:2,
-    type:"decor", slot:"poster",   src:"assets/decor/poster_sakura.png" },
-  { id:"rug_blue",      label:"あおいﾗｸﾞ",     cost:2,
-    type:"decor", slot:"rug",      src:"assets/decor/rug_blue.png" },
-  { id:"pot_tea",       label:"ﾃｨｰｾｯﾄ",       cost:2,
-    type:"decor", slot:"tabletop", src:"assets/decor/pot_tea.png" }
+  // ↓これを CFG.shopItems の配列の中身として丸ごと貼り替え
+{ id:"wall-kraft",  label:"クラフト", cost:2, type:"panel", wall:"#171a20" },
+{ id:"wall-navy",   label:"ネイビー", cost:2, type:"panel", wall:"#0f1524" },
+{ id:"wall-rose",   label:"ローズ",   cost:2, type:"panel", wall:"#1f1418" },
+{ id:"wall-mint",   label:"ミント",   cost:2, type:"panel", wall:"#12332b" },
+{ id:"wall-sakura", label:"サクラ",   cost:2, type:"panel", wall:"#2a1b23" },
+{ id:"wall-cream",  label:"クリーム", cost:2, type:"panel", wall:"#2c2418" },
+{ id:"wall-ink",    label:"インク",   cost:3, type:"panel", wall:"#0b0f16" },
+
+{ id:"poster_sakura", label:"サクラのポスター", cost:2,
+  type:"decor", slot:"poster", src:"assets/decor/poster_sakura.png" },
+
+{ id:"rug_blue", label:"あおいラグ", cost:2,
+  type:"decor", slot:"rug", src:"assets/decor/rug_blue.png" },
+
+{ id:"pot_tea", label:"ティーセット", cost:2,
+  type:"decor", slot:"tabletop", src:"assets/decor/pot_tea.png" },
   ]
 };
 
