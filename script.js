@@ -68,6 +68,7 @@ const shopGrid  = document.getElementById('shopGrid');
 
 // ===================== 状態 =====================
 let mood=5, hunger=5, sleep=5, nuts=0;
+let decor = { poster:null, rug:null, tabletop:null };
 
 // ===================== ユーティリティ =====================
 function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
@@ -123,6 +124,24 @@ function tick(){
   }
 
   updateView();
+
+  function renderDecor(){
+  const m = {
+    poster:   document.getElementById('slot-poster'),
+    rug:      document.getElementById('slot-rug'),
+    tabletop: document.getElementById('slot-tabletop')
+  };
+  for (const k of Object.keys(decor)){
+    const id = decor[k];
+    const el = m[k];
+    if (!el) continue;
+    if (!id){ el.src = ""; el.style.display = "none"; continue; }
+    const it = CFG.shopItems.find(x=>x.id===id);
+    if (!it){ el.src = ""; el.style.display = "none"; continue; }
+    el.src = it.src;
+    el.style.display = "block";
+  }
+}
 
   if (Math.random() < 0.15 && !STATE.isAway && !STATE.guest) {
     say(CFG.talk.idle, 1000);
@@ -351,6 +370,17 @@ function openShop(){
 
   renderShop();
 
+  if (it.type === 'panel'){
+  document.documentElement.style.setProperty('--panel-wall', it.wall);
+  say("｢ｶﾜｲｸ ﾅｯﾀ｣", 900);
+} else if (it.type === 'decor'){
+  decor[it.slot] = it.id;     // ← どのスロットに置くか
+  renderDecor();              // ← 反映
+  say("｢ｵｷｶｴ ﾃﾞｷﾀ｣", 900);
+}
+updateView();
+if (typeof saveGame === 'function') saveGame(true);  // ← サイレント保存
+
   // 閉じるボタン
   const btn = document.getElementById('shop-close');
   if (btn) {
@@ -391,13 +421,38 @@ function enableControls(){
 
 /* ===================== ボタン配線（入れ子なしの正解） ===================== */
 function saveGame(silent = false){
+  
+// ★ここに追加★ 起動時ロード
+try {
+  const raw = localStorage.getItem('fairy-room-v1');
+  if (raw) {
+    const d = JSON.parse(raw);
+    mood = d.mood || 0;
+    hunger = d.hunger || 0;
+    sleep = d.sleep || 0;
+    nuts = d.nuts || 0;
+    sky.dataset.state = d.skyState || 'day';
+    document.documentElement.style.setProperty('--panel-wall', d.panelWall || '#fff');
+
+    // デコ（模様替え）の復元
+    if (d.decor) {
+      decor = d.decor;
+      renderDecor();
+    }
+  }
+} catch(e){
+  console.warn("ロード失敗:", e);
+  }
+
   const data = {
     mood, hunger, sleep, nuts,
     skyState: sky.dataset.state,
     panelWall: getComputedStyle(document.documentElement)
                  .getPropertyValue('--panel-wall').trim()
+    decor
   };
   localStorage.setItem('fairy-room-v1', JSON.stringify(data));
+  
 
   // ← サイレント時はしゃべらない
   if (!silent) say("｢ﾆｯｷ ﾆ ｶｲﾀ｣", 900);
