@@ -199,3 +199,9 @@ img{ -webkit-user-drag:none; user-select:none; pointer-events:none; display:bloc
 .speech.guest {
   left: 65%;
 }
+.decor-layer { position: absolute; inset: 0; pointer-events:none; }
+.slot { position:absolute; pointer-events:none; }  /* まずは触れない */
+
+.slot.poster   { left: 78%; top: 20%;  width: 120px; transform:translate(-50%,0); z-index:2; }
+.slot.rug      { left: 50%; bottom: 9%; width: 320px; transform:translate(-50%,0); z-index:1; }
+.slot.tabletop { left: 86%; bottom: 32%; width: 60px;  transform:translate(-50%,0); z-index:3; }
