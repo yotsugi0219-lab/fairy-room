@@ -10,41 +10,10 @@ const CFG = {
     sleepE: ["｢…ｽｯｷﾘ｣","｢ﾖｸ ﾈﾀ｣","｢ﾏﾀﾞ ﾈﾑｲ ｶﾓ｣"],
     idle:   ["｢ｷｮｳﾊ ｲｲﾃﾝｷ｣","｢ﾄﾞﾝｸﾞﾘ… ﾄﾞｺｶﾆ ﾅｲｶﾅ｣","｢ｵﾊﾅｼ ｼﾀｲ ｷﾌﾞﾝ｣","｢ﾌﾜｧ…｣"]
   },
-  guests: [
-  {
-    id: 'fuyao', label: 'ﾌｰﾔｵ',
-    gift: { nuts:[1,3], mood:+1 },
-    lines: ["｢ｷｮｳﾊ ｲｲｶｾﾞ｣","｢ｺﾚ ﾄﾞｳｿﾞ｣","｢ﾏﾀ ｱｿﾎﾞ｣"]
-  },
-  {
-    id: 'fengxin', label: 'ﾌｫﾝｼﾝ',
-    gift: { nuts:[1,2], mood:+1 },
-    lines: ["｢ｻｸｯ ﾄ ﾐﾂｹﾀ｣","｢ﾔﾏﾐﾁ ﾖｶｯﾀ｣","｢ｵﾊﾅｼ ｽﾙ?｣"]
-  },
-  {
-    id: 'nanfeng', label: 'ﾅﾝﾌｫﾝ',
-    gift: { nuts:[2,3], mood:+0 },
-    lines: ["｢ｺﾝﾆﾁﾊ｣","｢ｱﾒ ﾌﾘｿｳ｣","｢ｵﾐﾔｹﾞ ﾓｯﾃｷﾀ｣"]
-  }
-],
   shopItems: [
-  // ↓これを CFG.shopItems の配列の中身として丸ごと貼り替え
-{ id:"wall-kraft",  label:"クラフト", cost:2, type:"panel", wall:"#171a20" },
-{ id:"wall-navy",   label:"ネイビー", cost:2, type:"panel", wall:"#0f1524" },
-{ id:"wall-rose",   label:"ローズ",   cost:2, type:"panel", wall:"#1f1418" },
-{ id:"wall-mint",   label:"ミント",   cost:2, type:"panel", wall:"#12332b" },
-{ id:"wall-sakura", label:"サクラ",   cost:2, type:"panel", wall:"#2a1b23" },
-{ id:"wall-cream",  label:"クリーム", cost:2, type:"panel", wall:"#2c2418" },
-{ id:"wall-ink",    label:"インク",   cost:3, type:"panel", wall:"#0b0f16" },
-
-{ id:"poster_sakura", label:"サクラのポスター", cost:2,
-  type:"decor", slot:"poster", src:"assets/decor/poster_sakura.png" },
-
-{ id:"rug_blue", label:"あおいラグ", cost:2,
-  type:"decor", slot:"rug", src:"assets/decor/rug_blue.png" },
-
-{ id:"pot_tea", label:"ティーセット", cost:2,
-  type:"decor", slot:"tabletop", src:"assets/decor/pot_tea.png" },
+    { id:"wall-kraft", label:"ｸﾗﾌﾄ", cost:2, type:"panel", wall:"#171a20" },
+    { id:"wall-navy",  label:"ﾈｲﾋﾞｰ", cost:2, type:"panel", wall:"#0f1524" },
+    { id:"wall-rose",  label:"ﾛｰｽﾞ",  cost:2, type:"panel", wall:"#1f1418" }
   ]
 };
 
@@ -78,26 +47,13 @@ const shopGrid  = document.getElementById('shopGrid');
 
 // ===================== 状態 =====================
 let mood=5, hunger=5, sleep=5, nuts=0;
-let decor = { poster:null, rug:null, tabletop:null };
 
 // ===================== ユーティリティ =====================
 function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
-function say(pool, ms = 1100, isGuest = false){
-  const line = Array.isArray(pool) ? pool[Math.floor(Math.random()*pool.length)] : pool;
-
-  // まず両方のクラスを外す
-  speech.classList.remove('fairy', 'guest');
-
-  // ゲストかどうかでクラスを付ける
-  if(isGuest){
-    speech.classList.add('guest');
-  } else {
-    speech.classList.add('fairy');
-  }
-
+function say(pool, ms=1100){
+  const line = Array.isArray(pool) ? pool[Math.floor(Math.random()*pool.length)] : String(pool);
   speechText.textContent = line;
   speech.classList.remove('hidden');
-
   clearTimeout(say._t);
   say._t = setTimeout(()=> speech.classList.add('hidden'), ms);
 }
@@ -135,24 +91,6 @@ function tick(){
 
   updateView();
 
-  function renderDecor(){
-  const m = {
-    poster:   document.getElementById('slot-poster'),
-    rug:      document.getElementById('slot-rug'),
-    tabletop: document.getElementById('slot-tabletop')
-  };
-  for (const k of Object.keys(decor)){
-    const id = decor[k];
-    const el = m[k];
-    if (!el) continue;
-    if (!id){ el.src = ""; el.style.display = "none"; continue; }
-    const it = CFG.shopItems.find(x=>x.id===id);
-    if (!it){ el.src = ""; el.style.display = "none"; continue; }
-    el.src = it.src;
-    el.style.display = "block";
-  }
-}
-
   if (Math.random() < 0.15 && !STATE.isAway && !STATE.guest) {
     say(CFG.talk.idle, 1000);
   }
@@ -180,66 +118,7 @@ function jump(){
     fairy.src = old.includes('fairy-happy') ? "assets/fairy-stand.png" : old;
   });
 }
-function jumpBoth(){
-  // まず妖精さん
-  jump();
-  // ゲストが居たら同じタイミングで小ジャンプ
-  if (guestSprite && guestSprite.classList.contains('show')) {
-    guestSprite.animate(
-      [
-        { transform:'translateX(-50%) translateY(0)' },
-        { transform:'translateX(-50%) translateY(-16px)' },
-        { transform:'translateX(-50%) translateY(0)' }
-      ],
-      { duration:420, easing:'ease-out' }
-    );
-  }
-}
-function callGuest(){
-  if (STATE.isAway || STATE.guest) { say("｢…ｲﾏ ﾑｽﾞｶｼｲ｣", 800); return; }
 
-  const g = CFG.guests[Math.floor(Math.random() * CFG.guests.length)];
-  STATE.guest = g.id;
-
-  // 画像表示
-  const sp = ensureGuestSprite();
-  sp.src = GFX_GUEST[g.id] || '';
-  sp.classList.add('show');
-
-  // 他操作無効
-  disableControls();
-  say(`｢${g.label} ｷﾀ｣`, 900);
-
-  // プレゼント
-  const [min,max] = g.gift.nuts;
-  const gain = min + Math.floor(Math.random() * (max - min + 1));
-
-  setTimeout(() => {
-    nuts = clamp(nuts + gain, 0, 99);
-    mood = clamp(mood + (g.gift.mood || 0), 0, CFG.max);
-    updateView();
-    jumpBoth();                        // ★ 二人でぴょん！
-    say(`｢ﾄﾞﾝｸﾞﾘ ${gain} ﾄﾞｳｿﾞ｣`, 1100);
-  }, 700);
-
-  // 雑談
-  setTimeout(() => {
-    const line = g.lines[Math.floor(Math.random() * g.lines.length)];
-    say(line, 1200);
-    jumpBoth();                        // ★ もう一回ぴょんしても可愛い
-  }, 2000);
-
-  // 退室
-  const stay = 3500 + Math.random()*2500;
-  if (callGuest._leaveTimer) clearTimeout(callGuest._leaveTimer);
-  callGuest._leaveTimer = setTimeout(() => {
-    STATE.guest = null;
-    sp.classList.remove('show');       // フェードアウト
-    enableControls();
-    say("｢ﾏﾀ ﾈ｣", 900);
-    if (typeof saveGame === 'function') saveGame(true);
-  }, stay);
-}
 function dropSnack(onLanded) {
   const fx = document.getElementById('fx');
   if (!fx) return;
@@ -283,24 +162,6 @@ function dropSnack(onLanded) {
   const el = document.getElementById(id);
   if(el){ el.setAttribute('draggable','false'); el.addEventListener('dragstart', e=>e.preventDefault()); }
 });
-// ゲスト画像マップ
-const GFX_GUEST = {
-  fuyao:   'assets/guest-fuyao.png',
-  fengxin: 'assets/guest-fengxin.png',
-  nanfeng:'assets/guest-nanfeng.png'
-};
-
-// ゲスト用スプライトを1度だけ用意
-let guestSprite = null;
-function ensureGuestSprite(){
-  if (guestSprite) return guestSprite;
-  guestSprite = document.createElement('img');
-  guestSprite.id = 'guestSprite';
-  guestSprite.className = 'guest';
-  guestSprite.alt = '';
-  fx.appendChild(guestSprite);
-  return guestSprite;
-}
 
 function show(el){
   if(!el) return;
@@ -315,10 +176,12 @@ function hide(el){
   el.setAttribute('aria-hidden','true');
 }
 function renderShop(){
-  shopGrid.innerHTML = '';   // ここで一度空にする
-  CFG.shopItems.forEach(it => {
+  if (!shopGrid) return;
+  shopGrid.innerHTML = "";
+
+  CFG.shopItems.forEach(it=>{
     const card = document.createElement('div');
-    card.className = 'card';
+    card.className = 'shop-item';
     card.innerHTML = `
       <div style="font-size:26px;">🧩</div>
       <div class="label">${it.label}</div>
@@ -330,31 +193,24 @@ function renderShop(){
 
   // 購入ボタン
 shopGrid.querySelectorAll('button[data-id]').forEach(btn=>{
-  btn.onclick = () => {
-  const id = btn.dataset.id;
-  const it = CFG.shopItems.find(x => x.id === id);
-  if (!it) return;
+  btn.onclick = ()=>{
+    const it = CFG.shopItems.find(x=>x.id===btn.dataset.id);
+    if(!it) return;
+    if(nuts < it.cost){ say("｢…ﾄﾞﾝｸﾞﾘ ﾀﾘﾅｲ｣", 1000); return; }
 
-  if (nuts < it.cost) { say("｢…ﾄﾞﾝｸﾞﾘ ﾀﾘﾅｲ｣", 1000); return; }
-  nuts = clamp(nuts - it.cost, 0, 99);
+    nuts = clamp(nuts - it.cost, 0, 99);
 
-  if (it.type === 'panel') {
-    // 壁紙（下帯）を反映
-    document.documentElement.style.setProperty('--panel-wall', it.wall);
-    say("｢ｶﾜｲｸ ﾅｯﾀ｣", 900);
-  } else if (it.type === 'decor') {
-    // 家具を反映（スロットに画像を表示）
-    const slotIdMap = { poster:'slot-poster', rug:'slot-rug', tabletop:'slot-tabletop' };
-    const img = document.getElementById(slotIdMap[it.slot]);
-    if (img) { img.src = it.src; img.style.display = 'block'; }
-    // 状態（保存用）
-    decor[it.slot] = it.id;
-    say("｢ｲｲｶﾝｼﾞ｣", 900);
-  }
+    if(it.type === 'panel'){
+      document.documentElement.style.setProperty('--panel-wall', it.wall);
+      say("｢ｶﾜｲｸ ﾅｯﾀ｣", 900);           // ← 購入時のセリフ
+    }
 
-  updateView();
-  if (typeof saveGame === 'function') saveGame(true); // サイレント保存
-};
+    updateView();
+
+    // ★ここがポイント：サイレント保存にする
+    if (typeof saveGame === 'function') saveGame(true);
+  };
+});
 
   // 閉じるボタン（毎回つなぎ直し）
   const close = document.getElementById('shop-close');
@@ -387,17 +243,6 @@ function openShop(){
 
   renderShop();
 
-  if (it.type === 'panel'){
-  document.documentElement.style.setProperty('--panel-wall', it.wall);
-  say("｢ｶﾜｲｸ ﾅｯﾀ｣", 900);
-} else if (it.type === 'decor'){
-  decor[it.slot] = it.id;     // ← どのスロットに置くか
-  renderDecor();              // ← 反映
-  say("｢ｵｷｶｴ ﾃﾞｷﾀ｣", 900);
-}
-updateView();
-if (typeof saveGame === 'function') saveGame(true);  // ← サイレント保存
-
   // 閉じるボタン
   const btn = document.getElementById('shop-close');
   if (btn) {
@@ -427,49 +272,16 @@ function closeShop(){
     window.__shopEsc = null;
   }
 }
-function disableControls(){
-  if (!cmdPanel) return;
-  cmdPanel.querySelectorAll('button').forEach(b => b.disabled = true);
-}
-function enableControls(){
-  if (!cmdPanel) return;
-  cmdPanel.querySelectorAll('button').forEach(b => b.disabled = false);
-}
 
 /* ===================== ボタン配線（入れ子なしの正解） ===================== */
 function saveGame(silent = false){
-  
-// ★ここに追加★ 起動時ロード
-try {
-  const raw = localStorage.getItem('fairy-room-v1');
-  if (raw) {
-    const d = JSON.parse(raw);
-    mood = d.mood || 0;
-    hunger = d.hunger || 0;
-    sleep = d.sleep || 0;
-    nuts = d.nuts || 0;
-    sky.dataset.state = d.skyState || 'day';
-    document.documentElement.style.setProperty('--panel-wall', d.panelWall || '#fff');
-
-    // デコ（模様替え）の復元
-    if (d.decor) {
-      decor = d.decor;
-      renderDecor();
-    }
-  }
-} catch(e){
-  console.warn("ロード失敗:", e);
-  }
-
- const data = {
-  mood, hunger, sleep, nuts,
-  skyState: sky.dataset.state,
-  panelWall: getComputedStyle(document.documentElement)
-               .getPropertyValue('--panel-wall').trim(), // ← ここに , を追加
-  decor                                                              // ← 追加項目
-};
+  const data = {
+    mood, hunger, sleep, nuts,
+    skyState: sky.dataset.state,
+    panelWall: getComputedStyle(document.documentElement)
+                 .getPropertyValue('--panel-wall').trim()
+  };
   localStorage.setItem('fairy-room-v1', JSON.stringify(data));
-  
 
   // ← サイレント時はしゃべらない
   if (!silent) say("｢ﾆｯｷ ﾆ ｶｲﾀ｣", 900);
@@ -561,7 +373,7 @@ on('act-adventure', () => {
   });
 
   // ｾｰﾌﾞ
-  on('act-save', () => saveGame(false));
+  on('act-save', saveGame);
 
   // ｼｮｯﾌﾟ開閉
   on('act-shop', () => {
@@ -579,12 +391,6 @@ on('act-adventure', () => {
 
   console.log('[wire] buttons ready');
 })();
-// 既存 CFG.shopItems に追加
-CFG.shopItems.push(
-  { id:"poster-sakura",  label:"ｻｸﾗの絵", cost:2, type:"decor", slot:"poster",   src:"assets/decor/poster_sakura.png" },
-  { id:"rug-blue",       label:"あおﾗｸﾞ",  cost:2, type:"decor", slot:"rug",      src:"assets/decor/rug_blue.png" },
-  { id:"pot-tea",        label:"ﾃｨｰｾｯﾄ",   cost:1, type:"decor", slot:"tabletop", src:"assets/decor/pot_tea.png" },
-);
 
 
 // ===================== メモ：どんぐりの入手（後で実装予定） =====================
