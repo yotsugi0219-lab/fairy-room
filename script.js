@@ -34,7 +34,13 @@ const CFG = {
     { id:"wall-mint",   label:"ﾐﾝﾄ",   cost:2, type:"panel", wall:"#12332b" },
     { id:"wall-sakura", label:"ｻｸﾗ",   cost:2, type:"panel", wall:"#2a1b23" },
     { id:"wall-cream",  label:"ｸﾘｰﾑ",  cost:2, type:"panel", wall:"#2c2418" },
-    { id:"wall-ink",    label:"ｲﾝｸ",   cost:3, type:"panel", wall:"#0b0f16" }
+    { id:"wall-ink",    label:"ｲﾝｸ",   cost:3, type:"panel", wall:"#0b0f16" },
+      { id:"poster_sakura", label:"ｻｸﾗのﾎﾟｽﾀｰ", cost:2,
+    type:"decor", slot:"poster",   src:"assets/decor/poster_sakura.png" },
+  { id:"rug_blue",      label:"あおいﾗｸﾞ",     cost:2,
+    type:"decor", slot:"rug",      src:"assets/decor/rug_blue.png" },
+  { id:"pot_tea",       label:"ﾃｨｰｾｯﾄ",       cost:2,
+    type:"decor", slot:"tabletop", src:"assets/decor/pot_tea.png" }
   ]
 };
 
