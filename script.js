@@ -444,13 +444,13 @@ try {
   console.warn("ロード失敗:", e);
   }
 
-  const data = {
-    mood, hunger, sleep, nuts,
-    skyState: sky.dataset.state,
-    panelWall: getComputedStyle(document.documentElement)
-                 .getPropertyValue('--panel-wall').trim()
-    decor
-  };
+ const data = {
+  mood, hunger, sleep, nuts,
+  skyState: sky.dataset.state,
+  panelWall: getComputedStyle(document.documentElement)
+               .getPropertyValue('--panel-wall').trim(), // ← ここに , を追加
+  decor                                                              // ← 追加項目
+};
   localStorage.setItem('fairy-room-v1', JSON.stringify(data));
   
 
