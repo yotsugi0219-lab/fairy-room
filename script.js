@@ -507,6 +507,12 @@ on('act-adventure', () => {
 
   console.log('[wire] buttons ready');
 })();
+// 既存 CFG.shopItems に追加
+CFG.shopItems.push(
+  { id:"poster-sakura",  label:"ｻｸﾗの絵", cost:2, type:"decor", slot:"poster",   src:"assets/decor/poster_sakura.png" },
+  { id:"rug-blue",       label:"あおﾗｸﾞ",  cost:2, type:"decor", slot:"rug",      src:"assets/decor/rug_blue.png" },
+  { id:"pot-tea",        label:"ﾃｨｰｾｯﾄ",   cost:1, type:"decor", slot:"tabletop", src:"assets/decor/pot_tea.png" },
+);
 
 
 // ===================== メモ：どんぐりの入手（後で実装予定） =====================
